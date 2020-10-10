@@ -1,7 +1,7 @@
 FROM debian/buildd:testing AS base
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 RUN apt-get update && apt-get -y install \
-    automake autoconf binutils build-essential cmake coreutils ca-certificates curl dos2unix git libarchive-tools libtool-bin libsystemd-dev lld musl-tools ncurses-bin ninja-build pkgconf util-linux --no-install-recommends \
+    automake autoconf binutils build-essential cmake coreutils ca-certificates curl dos2unix git libarchive-tools libedit-dev libtool-bin libsystemd-dev lld musl-tools ncurses-bin ninja-build pkgconf util-linux --no-install-recommends \
     && apt-get clean && rm -rf /var/lib/apt/lists/* \
     # && ( cd /usr || exit 1; cmake_version=$(curl -sSL -H "Accept: application/vnd.github.v3+json" 'https://api.github.com/repos/Kitware/CMake/tags?per_page=32' | grep 'name' | cut -d\" -f4 | grep -oEm1 '3\.18\.[0-9]+') && curl -LROJ4q --retry 5 --retry-delay 10 --retry-max-time 60 "https://github.com/Kitware/CMake/releases/download/v${cmake_version}/cmake-${cmake_version}-Linux-x86_64.sh" && bash "cmake-${cmake_version}-Linux-x86_64.sh" --skip-license && rm -- /usr/"cmake-${cmake_version}-Linux-x86_64.sh" /usr/bin/cmake-gui /usr/bin/ctest /usr/bin/cpack /usr/bin/ccmake; true ) \
     # && ( curl -LROJ4q --retry 5 --retry-delay 10 --retry-max-time 60 "$(curl -sL 'https://api.github.com/repos/ninja-build/ninja/releases/latest' | grep 'browser_download_url' | grep 'ninja-linux.zip' | cut -d\" -f4)" && bsdtar xf ninja-linux.zip && rm /usr/bin/ninja && mv ./ninja /usr/bin/ && rm ninja-linux.zip ) \
@@ -19,14 +19,7 @@ RUN apt-get update && apt-get -y install \
     && curl -sSLROJ --retry 5 --retry-delay 10 --retry-max-time 60 'http://ftp.barfooze.de/pub/sabotage/tarballs/gettext-tiny-0.3.2.tar.xz' \
     && bsdtar -xf 'gettext-tiny-0.3.2.tar.xz' \
     && ( cd /gettext-tiny-0.3.2 || exit 1; make CFLAGS='-Os -Wall -fPIC' LDFLAGS='-fuse-ld=lld' PREFIX=/usr -j "$(nproc)" all install ) \
-    && rm -rf /gettext-tiny-0.3.2* \
-    ### https://github.com/AmokHuginnsson/replxx
-    && curl -sSLROJ --retry 5 --retry-delay 10 --retry-max-time 60 'https://github.com/AmokHuginnsson/replxx/archive/master.zip' \
-    && bsdtar -xf 'replxx-master.zip' \
-    && ( mkdir -p /replxx-master/build && cd /replxx-master/build || exit 1; cmake -DCMAKE_BUILD_TYPE=Release -DBUILD_SHARED_LIBS=ON -DREPLXX_BUILD_EXAMPLES=OFF .. && make CFLAGS='-Os -Wall -fPIC' LDFLAGS='-fuse-ld=lld' -j "$(nproc)" && make install && rm -r /replxx-master/build ) \
-    && ( mkdir -p /replxx-master/build && cd /replxx-master/build || exit 1; cmake -DCMAKE_BUILD_TYPE=Release -DBUILD_SHARED_LIBS=OFF -DREPLXX_BUILD_EXAMPLES=ON .. && make CFLAGS='-Os -Wall -fPIC' LDFLAGS='-fuse-ld=lld' -j "$(nproc)" && make install ) \
-    && ( ln -sf /usr/local/lib/libreplxx.a /usr/lib/libreadline.a && ln -sf /usr/local/lib/libreplxx.so /usr/lib/libreadline.so && mkdir -p /usr/include/readline && touch /usr/include/readline/history.h && touch /usr/include/readline/tilde.h && ln -sf /usr/include/editline/readline.h /usr/include/readline/readline.h ) \
-    && rm -rf /replxx-master*
+    && rm -rf /gettext-tiny-0.3.2*
 
 FROM base AS step1_pcre2
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
@@ -85,3 +78,23 @@ RUN source "${HOME}/.bashrc" \
 WORKDIR "openssl-${openssl_github_tag}"
 RUN ./config --prefix="$(pwd -P)/.openssl" no-shared \
     && make -j "$(nproc)" && make install_sw
+
+FROM step5_openssl AS haproxy_builder
+SHELL ["/bin/bash", "-o", "pipefail", "-c"]
+ENV haproxy_version="2.2.4"
+ENV openssl_github_tag="OpenSSL_1_1_1h"
+COPY --from=step3_libslz "${HOME}/haproxy_static/libslz" "${HOME}/haproxy_static/libslz/"
+COPY --from=step5_openssl "${HOME}/haproxy_static/openssl-${openssl_github_tag}" "${HOME}/haproxy_static/openssl-${openssl_github_tag}/"
+WORKDIR "${HOME}/haproxy_static"
+RUN source "${HOME}/.bashrc" \
+    && curl -sSROJ "https://www.haproxy.org/download/2.2/src/haproxy-${haproxy_version}.tar.gz" \
+    && bsdtar -xf "haproxy-${haproxy_version}.tar.gz" && rm "haproxy-${haproxy_version}.tar.gz"
+WORKDIR "haproxy-${haproxy_version}"
+RUN ls -alF --color=auto "${HOME}/haproxy_static" \
+    && make clean \
+    && make -j "$(nproc)" TARGET=linux-glibc EXTRA_OBJS="contrib/prometheus-exporter/service-prometheus.o" \
+    ADDLIB="-ljemalloc $(jemalloc-config --libs)" \
+    USE_LUA=1 LUA_INC=/usr/local/include LUA_LIB=/usr/local/lib LUA_LIB_NAME=lua \
+    USE_PCRE2_JIT=1 USE_STATIC_PCRE2=1 USE_SYSTEMD=1 \
+    USE_OPENSSL=1 SSL_INC="$HOME/haproxy_static/openssl-${openssl_github_tag}/.openssl/include" SSL_LIB="$HOME/haproxy_static/openssl-${openssl_github_tag}/.openssl/lib" \
+    USE_SLZ=1 SLZ_INC="$HOME/haproxy_static/libslz/src" SLZ_LIB="$HOME/haproxy_static/libslz"
