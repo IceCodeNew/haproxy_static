@@ -64,12 +64,13 @@ RUN sed -i -E 's!PREFIX     := \/usr\/local!PREFIX     := /usr!' Makefile \
 FROM step3_libslz AS step4_jemalloc
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 WORKDIR "${HOME}/haproxy_static"
+ENV jemalloc_version="5.2.1"
 RUN source "${HOME}/.bashrc" \
-    && var_icn_download=$(curl -sL https://api.github.com/repos/jemalloc/jemalloc/releases/latest | grep 'browser_download_url' | grep -i 'tar.bz2' | cut -d\" -f4) \
-    && var_icn_filename='jemalloc-'"$(echo "$var_icn_download" | grep -Po '(?<=releases\/download\/)[^\/]+')" \
+    && var_icn_download="https://github.com/jemalloc/jemalloc/releases/download/${jemalloc_version}/jemalloc-${jemalloc_version}.tar.bz2" \
+    && var_icn_filename='jemalloc-'"$jemalloc_version" \
     && curl -sSR -o "$var_icn_filename"'.tar.bz2' -- "$var_icn_download" \
     && bsdtar -xf "$var_icn_filename"'.tar.bz2' && rm "$var_icn_filename"'.tar.bz2'
-WORKDIR "$var_icn_filename"
+WORKDIR 'jemalloc-'"$jemalloc_version"
 RUN ./configure --prefix=/usr \
     && make -j "$(nproc)" \
     && make install
