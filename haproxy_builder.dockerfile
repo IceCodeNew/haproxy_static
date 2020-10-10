@@ -77,8 +77,8 @@ RUN ./configure --prefix=/usr \
 FROM step4_jemalloc AS step5_openssl
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 WORKDIR "${HOME}/haproxy_static"
+ENV openssl_github_tag="OpenSSL_1_1_1h"
 RUN source "${HOME}/.bashrc" \
-    && openssl_github_tag=$(curl -H "Accept: application/vnd.github.v3+json" -sSL 'https://api.github.com/repos/openssl/openssl/tags?per_page=32' | grep 'name' | cut -d\" -f4 | grep -Em1 'OpenSSL_1_1_[0-9][a-z]') \
     && curl -sSROJ 'https://github.com/openssl/openssl/archive/'"${openssl_github_tag}.tar.gz" \
     && bsdtar -xf "openssl-${openssl_github_tag}.tar.gz" && rm "openssl-${openssl_github_tag}.tar.gz"
 WORKDIR "openssl-${openssl_github_tag}"
