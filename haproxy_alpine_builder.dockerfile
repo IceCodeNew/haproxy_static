@@ -1,8 +1,7 @@
 FROM alpine:edge AS base
 SHELL ["/bin/ash", "-eo", "pipefail", "-c"]
-RUN apk update; \
-    apk --no-cache add apk-tools automake autoconf bash bash-completion binutils build-base clang-dev clang-static cmake coreutils ca-certificates curl dos2unix dpkg gettext-tiny-dev git grep libarchive-tools libedit-dev libedit-static libtool linux-headers lld musl-dev musl-libintl musl-utils ncurses ncurses-dev ncurses-static openssl openssl-dev openssl-libs-static pcre2 pcre2-dev pcre2-tools perl pkgconf samurai util-linux; \
-    ### apk --no-cache add bat fd fzf go mlocate patch python3 python3-dev py3-pip util-linux-dev vim; \
+RUN apk update; apk --no-cache add \
+    apk-tools autoconf automake bash bash-completion binutils build-base ca-certificates clang-dev clang-static cmake coreutils curl dos2unix dpkg gettext-tiny-dev git go grep libarchive-tools libedit-dev libedit-static libtool linux-headers lld musl-dev musl-libintl musl-utils ncurses ncurses-dev ncurses-static openssl openssl-dev openssl-libs-static pcre2 pcre2-dev pcre2-tools perl pkgconf samurai util-linux; \
     apk --no-cache upgrade; \
     update-alternatives --install /usr/local/bin/cc cc /usr/bin/clang 100; \
     update-alternatives --install /usr/local/bin/c++ c++ /usr/bin/clang++ 100; \
@@ -51,4 +50,38 @@ RUN source "/root/.bashrc" \
     USE_PCRE2_JIT=1 USE_STATIC_PCRE2=1 \
     USE_OPENSSL=1 SSL_INC="/usr/include/openssl" SSL_LIB="/usr/lib" \
     USE_SLZ=1 SLZ_INC="/root/haproxy_static/libslz/src" SLZ_LIB="/root/haproxy_static/libslz" \
-    CC=clang LDFLAGS="-fuse-ld=lld -static-pie -static -nolibc -Wl,-Bstatic -L /usr/lib -l:libc.a"
+    CC=clang LDFLAGS="-fuse-ld=lld -static-pie -static -nolibc -Wl,-Bstatic -L /usr/lib -l:libc.a" \
+    && cp haproxy haproxy.ori \
+    && strip haproxy
+
+FROM haproxy_builder AS haproxy_uploader
+SHELL ["/bin/bash", "-o", "pipefail", "-c"]
+ENV haproxy_version="2.2.4"
+ENV GITHUB_TOKEN="set_your_github_token_here"
+RUN source "/root/.bashrc" \
+    # && go env -w GO111MODULE=on \
+    # && go env -w GOPROXY=https://goproxy.cn,direct \
+    && go env -w GOFLAGS="$GOFLAGS -buildmode=pie" \
+    && go env -w CGO_CPPFLAGS="$CGO_CPPFLAGS -D_FORTIFY_SOURCE=2" \
+    && go env -w CGO_LDFLAGS="$CGO_LDFLAGS -Wl,-z,relro,-z,now" \
+    && go get -u -v github.com/github-release/github-release \
+    && mv -f "$HOME/go/bin"/* '/usr/local/bin' \
+    && rm -r "$HOME/.cache/go-build" "$HOME/go"
+WORKDIR "/root/haproxy_static/haproxy-${haproxy_version}"
+RUN github-release release \
+    --user IceCodeNew \
+    --repo haproxy_static \
+    --tag "v${haproxy_version}" \
+    --name "v${haproxy_version}"; \
+    github-release upload \
+    --user IceCodeNew \
+    --repo haproxy_static \
+    --tag "v${haproxy_version}" \
+    --name "haproxy" \
+    --file "/root/haproxy_static/haproxy-${haproxy_version}/haproxy" \
+    && github-release upload \
+    --user IceCodeNew \
+    --repo haproxy_static \
+    --tag "v${haproxy_version}" \
+    --name "haproxy.ori" \
+    --file "/root/haproxy_static/haproxy-${haproxy_version}/haproxy.ori"
