@@ -16,20 +16,21 @@ RUN apk update; apk --no-cache add \
 
 FROM base AS step1_lua54
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
+ENV lua_version="5.4.0"
 WORKDIR /root/haproxy_static
 RUN source "/root/.bashrc" \
-    && curl -sSROJ 'https://www.lua.org/ftp/lua-5.4.0.tar.gz' \
-    && sha1check lua-5.4.0.tar.gz 8cdbffa8a214a23d190d7c45f38c19518ae62e89 \
-    && bsdtar -xf lua-5.4.0.tar.gz && rm lua-5.4.0.tar.gz
-WORKDIR /root/haproxy_static/lua-5.4.0
 RUN make all test \
+    && curl -sSROJ "https://www.lua.org/ftp/lua-${lua_version}.tar.gz" \
+    && sha1sum "lua-${lua_version}.tar.gz" | grep '8cdbffa8a214a23d190d7c45f38c19518ae62e89' \
+    && bsdtar -xf "lua-${lua_version}.tar.gz" && rm "lua-${lua_version}.tar.gz"
+WORKDIR "/root/haproxy_static/lua-${lua_version}"
     && make install
 
 FROM step1_lua54 AS step2_libslz
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
+ENV libslz_version="1.2.0"
 WORKDIR /root/haproxy_static
 RUN source "/root/.bashrc" \
-    && export libslz_version=1.2.0 \
     && curl -sSROJ "http://git.1wt.eu/web?p=libslz.git;a=snapshot;h=v${libslz_version};sf=tbz2" \
     && bsdtar -xf "libslz-v${libslz_version}.tar.bz2" && rm "libslz-v${libslz_version}.tar.bz2"
 WORKDIR /root/haproxy_static/libslz

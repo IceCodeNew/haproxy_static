@@ -1,10 +1,13 @@
 FROM debian/buildd:testing AS base
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
+ENV cmake_version="3.18.4"
+ENV netbsd_curses_version="0.3.1"
+ENV gettext_tiny_version="0.3.2"
 RUN apt-get update && apt-get -y install \
     autoconf automake binutils build-essential ca-certificates checkinstall cmake coreutils curl dos2unix git libarchive-tools libedit-dev libsystemd-dev libtool-bin lld musl-tools ncurses-bin ninja-build pkgconf util-linux --no-install-recommends \
     && apt-get clean && rm -rf /var/lib/apt/lists/* \
-    && ( cd /usr || exit 1; cmake_version=$(curl -sSL -H "Accept: application/vnd.github.v3+json" 'https://api.github.com/repos/Kitware/CMake/tags?per_page=32' | grep 'name' | cut -d\" -f4 | grep -oEm1 '3\.18\.[0-9]+') && curl -LROJ4q --retry 5 --retry-delay 10 --retry-max-time 60 "https://github.com/Kitware/CMake/releases/download/v${cmake_version}/cmake-${cmake_version}-Linux-x86_64.sh" && bash "cmake-${cmake_version}-Linux-x86_64.sh" --skip-license && rm -- /usr/"cmake-${cmake_version}-Linux-x86_64.sh" /usr/bin/cmake-gui /usr/bin/ctest /usr/bin/cpack /usr/bin/ccmake; true ) \
     && ( curl -LROJ4q --retry 5 --retry-delay 10 --retry-max-time 60 "$(curl -sL 'https://api.github.com/repos/ninja-build/ninja/releases/latest' | grep 'browser_download_url' | grep 'ninja-linux.zip' | cut -d\" -f4)" && bsdtar xf ninja-linux.zip && rm /usr/bin/ninja && mv ./ninja /usr/bin/ && rm ninja-linux.zip ) \
+    && ( cd /usr || exit 1; curl -LROJ4q --retry 5 --retry-delay 10 --retry-max-time 60 "https://github.com/Kitware/CMake/releases/download/v${cmake_version}/cmake-${cmake_version}-Linux-x86_64.sh" && bash "cmake-${cmake_version}-Linux-x86_64.sh" --skip-license && rm -- "/usr/cmake-${cmake_version}-Linux-x86_64.sh" /usr/bin/cmake-gui /usr/bin/ctest /usr/bin/cpack /usr/bin/ccmake; true ) \
     && update-ca-certificates \
     && update-alternatives --install /usr/local/bin/ld ld /usr/lib/llvm-9/bin/lld 100 \
     && update-alternatives --auto ld \
@@ -12,43 +15,45 @@ RUN apt-get update && apt-get -y install \
     && mkdir -p '/root/haproxy_static' \
     && mkdir -p '/usr/local/doc' \
     ### https://github.com/sabotage-linux/netbsd-curses
-    && curl -sSLROJ --retry 5 --retry-delay 10 --retry-max-time 60 'http://ftp.barfooze.de/pub/sabotage/tarballs/netbsd-curses-0.3.1.tar.xz' \
-    && bsdtar -xf 'netbsd-curses-0.3.1.tar.xz' \
-    && ( cd /netbsd-curses-0.3.1 || exit 1; make CFLAGS='-Os -Wall -fPIC' LDFLAGS='-fuse-ld=lld' PREFIX=/usr -j "$(nproc)" all install ) \
-    && rm -rf /netbsd-curses-0.3.1* \
+    && curl -sSLROJ --retry 5 --retry-delay 10 --retry-max-time 60 "http://ftp.barfooze.de/pub/sabotage/tarballs/netbsd-curses-${netbsd_curses_version}.tar.xz" \
+    && bsdtar -xf "netbsd-curses-${netbsd_curses_version}.tar.xz" \
+    && ( cd "/netbsd-curses-${netbsd_curses_version}" || exit 1; make CFLAGS="$CFLAGS -fPIC" PREFIX=/usr -j "$(nproc)" all install ) \
+    && rm -rf "/netbsd-curses-${netbsd_curses_version}"* \
     ### https://github.com/sabotage-linux/gettext-tiny
-    && curl -sSLROJ --retry 5 --retry-delay 10 --retry-max-time 60 'http://ftp.barfooze.de/pub/sabotage/tarballs/gettext-tiny-0.3.2.tar.xz' \
-    && bsdtar -xf 'gettext-tiny-0.3.2.tar.xz' \
-    && ( cd /gettext-tiny-0.3.2 || exit 1; make CFLAGS='-Os -Wall -fPIC' LDFLAGS='-fuse-ld=lld' PREFIX=/usr -j "$(nproc)" all install ) \
-    && rm -rf /gettext-tiny-0.3.2*
+    && curl -sSLROJ --retry 5 --retry-delay 10 --retry-max-time 60 "http://ftp.barfooze.de/pub/sabotage/tarballs/gettext-tiny-${gettext_tiny_version}.tar.xz" \
+    && bsdtar -xf "gettext-tiny-${gettext_tiny_version}.tar.xz" \
+    && ( cd "/gettext-tiny-${gettext_tiny_version}" || exit 1; make CFLAGS="$CFLAGS -fPIC" PREFIX=/usr -j "$(nproc)" all install ) \
+    && rm -rf "/gettext-tiny-${gettext_tiny_version}"*
 
 FROM base AS step1_pcre2
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
+ENV pcre2_version="10.35"
 WORKDIR /root/haproxy_static
 RUN source "/root/.bashrc" \
-    && curl -sSROJ 'https://ftp.pcre.org/pub/pcre/pcre2-10.35.tar.bz2' \
-    && bsdtar -xf pcre2-10.35.tar.bz2 && rm pcre2-10.35.tar.bz2
-WORKDIR /root/haproxy_static/pcre2-10.35
+    && curl -sSROJ "https://ftp.pcre.org/pub/pcre/pcre2-${pcre2_version}.tar.bz2" \
+    && bsdtar -xf "pcre2-${pcre2_version}.tar.bz2" && rm "pcre2-${pcre2_version}.tar.bz2"
+WORKDIR "/root/haproxy_static/pcre2-${pcre2_version}"
 RUN ./configure --enable-jit --enable-jit-sealloc \
     && make -j "$(nproc)" CFLAGS='-mshstk' \
     && make install
 
 FROM step1_pcre2 AS step2_lua54
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
+ENV lua_version="5.4.0"
 WORKDIR /root/haproxy_static
 RUN source "/root/.bashrc" \
-    && curl -sSROJ 'https://www.lua.org/ftp/lua-5.4.0.tar.gz' \
-    && sha1check lua-5.4.0.tar.gz 8cdbffa8a214a23d190d7c45f38c19518ae62e89 \
-    && bsdtar -xf lua-5.4.0.tar.gz && rm lua-5.4.0.tar.gz
-WORKDIR /root/haproxy_static/lua-5.4.0
 RUN make all test \
+    && curl -sSROJ "https://www.lua.org/ftp/lua-${lua_version}.tar.gz" \
+    && sha1sum "lua-${lua_version}.tar.gz" | grep '8cdbffa8a214a23d190d7c45f38c19518ae62e89' \
+    && bsdtar -xf "lua-${lua_version}.tar.gz" && rm "lua-${lua_version}.tar.gz"
+WORKDIR "/root/haproxy_static/lua-${lua_version}"
     && make install
 
 FROM step2_lua54 AS step3_libslz
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
+ENV libslz_version="1.2.0"
 WORKDIR /root/haproxy_static
 RUN source "/root/.bashrc" \
-    && export libslz_version=1.2.0 \
     && curl -sSROJ "http://git.1wt.eu/web?p=libslz.git;a=snapshot;h=v${libslz_version};sf=tbz2" \
     && bsdtar -xf "libslz-v${libslz_version}.tar.bz2" && rm "libslz-v${libslz_version}.tar.bz2"
 WORKDIR /root/haproxy_static/libslz
