@@ -1,9 +1,11 @@
 FROM debian/buildd:testing AS base
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
+ARG DEBIAN_FRONTEND=noninteractive
 ENV cmake_version="3.18.4"
 ENV netbsd_curses_version="0.3.1"
 ENV gettext_tiny_version="0.3.2"
-RUN apt-get update && apt-get -y install \
+RUN locale-gen en_US && update-locale LANG=en_US \
+    && apt-get update && apt-get -y install \
     autoconf automake binutils build-essential ca-certificates checkinstall checksec cmake coreutils curl dos2unix git libarchive-tools libedit-dev libsystemd-dev libtool-bin lld musl-tools ncurses-bin ninja-build pkgconf util-linux --no-install-recommends \
     && apt-get clean && rm -rf /var/lib/apt/lists/* \
     && ( cd /usr || exit 1; curl -LROJ4q --retry 5 --retry-delay 10 --retry-max-time 60 "https://github.com/Kitware/CMake/releases/download/v${cmake_version}/cmake-${cmake_version}-Linux-x86_64.sh" && bash "cmake-${cmake_version}-Linux-x86_64.sh" --skip-license && rm -- "/usr/cmake-${cmake_version}-Linux-x86_64.sh" /usr/bin/cmake-gui /usr/bin/ctest /usr/bin/cpack /usr/bin/ccmake; true ) \
@@ -110,16 +112,20 @@ FROM haproxy_builder AS haproxy_uploader
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 ENV haproxy_version="2.2.4"
 ENV GITHUB_TOKEN="set_your_github_token_here"
+ARG LANG="en_US.utf-8"
+ARG LC_ALL="en_US.utf-8"
 RUN echo 'export PATH=$PATH:/usr/local/go/bin' >> ~/.bashrc \
     && echo 'export PATH=$PATH:"$HOME"/go/bin' >> ~/.bashrc \
     && source "/root/.bashrc" \
     && curl -LROJ 'https://dl.google.com/go/go1.15.2.linux-amd64.tar.gz' \
-    && bsdtar -C /usr/local -xf 'go1.15.2.linux-amd64.tar.gz' && rm 'go1.15.2.linux-amd64.tar.gz' \
+    && bsdtar -C /usr/local -xf 'go1.15.2.linux-amd64.tar.gz' && rm 'go1.15.2.linux-amd64.tar.gz'; \
+    go env -w GOFLAGS="$GOFLAGS -buildmode=pie" \
+    && go env -w CGO_CFLAGS="$CGO_CFLAGS -O2 -D_FORTIFY_SOURCE=2 -pipe -fexceptions -fstack-clash-protection -fstack-protector-strong -g -grecord-gcc-switches -Wl,-z,noexecstack,-z,relro,-z,now,-z,defs -Wl,--icf=all" \
+    && go env -w CGO_CPPFLAGS="$CGO_CPPFLAGS -O2 -D_FORTIFY_SOURCE=2 -pipe -fexceptions -fstack-clash-protection -fstack-protector-strong -g -grecord-gcc-switches -Wl,-z,noexecstack,-z,relro,-z,now,-z,defs -Wl,--icf=all" \
+    && go env -w CGO_CXXFLAGS="$CGO_CXXFLAGS -O2 -D_FORTIFY_SOURCE=2 -pipe -fexceptions -fstack-clash-protection -fstack-protector-strong -g -grecord-gcc-switches -Wl,-z,noexecstack,-z,relro,-z,now,-z,defs -Wl,--icf=all" \
+    && go env -w CGO_LDFLAGS="$CGO_LDFLAGS -fuse-ld=lld -Wl,-z,noexecstack,-z,relro,-z,now,-z,defs -Wl,--icf=all" \
     # && go env -w GO111MODULE=on \
     # && go env -w GOPROXY=https://goproxy.cn,direct \
-    && go env -w GOFLAGS="$GOFLAGS -buildmode=pie" \
-    && go env -w CGO_CPPFLAGS="$CGO_CPPFLAGS -D_FORTIFY_SOURCE=2" \
-    && go env -w CGO_LDFLAGS="$CGO_LDFLAGS -Wl,-z,relro,-z,now" \
     && go get -u -v github.com/github-release/github-release \
     && mv -f "$HOME/go/bin"/* '/usr/local/bin' \
     && rm -r "$HOME/.cache/go-build" "$HOME/go"

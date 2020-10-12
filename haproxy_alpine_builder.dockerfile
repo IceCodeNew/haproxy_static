@@ -60,11 +60,12 @@ SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 ENV haproxy_version="2.2.4"
 ENV GITHUB_TOKEN="set_your_github_token_here"
 RUN source "/root/.bashrc" \
+    && go env -w GOFLAGS="$GOFLAGS -buildmode=pie" \
+    && go env -w CGO_CFLAGS="$CGO_CFLAGS -O2 -D_FORTIFY_SOURCE=2 -pipe -fexceptions -fstack-clash-protection -fstack-protector-strong -g -grecord-gcc-switches -Wl,-z,noexecstack,-z,relro,-z,now,-z,defs -Wl,--icf=all" \
+    && go env -w CGO_CXXFLAGS="$CGO_CXXFLAGS -O2 -D_FORTIFY_SOURCE=2 -pipe -fexceptions -fstack-clash-protection -fstack-protector-strong -g -grecord-gcc-switches -Wl,-z,noexecstack,-z,relro,-z,now,-z,defs -Wl,--icf=all" \
+    && go env -w CGO_LDFLAGS="$CGO_LDFLAGS -fuse-ld=lld -Wl,-z,noexecstack,-z,relro,-z,now,-z,defs -Wl,--icf=all" \
     # && go env -w GO111MODULE=on \
     # && go env -w GOPROXY=https://goproxy.cn,direct \
-    && go env -w GOFLAGS="$GOFLAGS -buildmode=pie" \
-    && go env -w CGO_CPPFLAGS="$CGO_CPPFLAGS -D_FORTIFY_SOURCE=2" \
-    && go env -w CGO_LDFLAGS="$CGO_LDFLAGS -Wl,-z,relro,-z,now" \
     && go get -u -v github.com/github-release/github-release \
     && mv -f "$HOME/go/bin"/* '/usr/local/bin' \
     && rm -r "$HOME/.cache/go-build" "$HOME/go"
