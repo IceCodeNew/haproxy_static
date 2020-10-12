@@ -35,7 +35,7 @@ RUN source "/root/.bashrc" \
     && bsdtar -xf "pcre2-${pcre2_version}.tar.bz2" && rm "pcre2-${pcre2_version}.tar.bz2"
 WORKDIR "/root/haproxy_static/pcre2-${pcre2_version}"
 RUN ./configure --enable-jit --enable-jit-sealloc \
-    && make -j "$(nproc)" CFLAGS='-mshstk' \
+    && make -j "$(nproc)" CFLAGS="$CFLAGS -mshstk -fPIC" \
     && make install
 
 FROM step1_pcre2 AS step2_lua54
@@ -43,11 +43,11 @@ SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 ENV lua_version="5.4.0"
 WORKDIR /root/haproxy_static
 RUN source "/root/.bashrc" \
-RUN make all test \
     && curl -sSROJ "https://www.lua.org/ftp/lua-${lua_version}.tar.gz" \
     && sha1sum "lua-${lua_version}.tar.gz" | grep '8cdbffa8a214a23d190d7c45f38c19518ae62e89' \
     && bsdtar -xf "lua-${lua_version}.tar.gz" && rm "lua-${lua_version}.tar.gz"
 WORKDIR "/root/haproxy_static/lua-${lua_version}"
+RUN make CFLAGS="$CFLAGS -fPIE -Wl,-pie" all test \
     && make install
 
 FROM step2_lua54 AS step3_libslz
@@ -59,7 +59,7 @@ RUN source "/root/.bashrc" \
     && bsdtar -xf "libslz-v${libslz_version}.tar.bz2" && rm "libslz-v${libslz_version}.tar.bz2"
 WORKDIR /root/haproxy_static/libslz
 RUN sed -i -E 's!PREFIX     := \/usr\/local!PREFIX     := /usr!' Makefile \
-    && make static
+    && make CFLAGS="$CFLAGS -fPIE -Wl,-pie" static
 
 FROM step3_libslz AS step4_jemalloc
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
@@ -72,7 +72,7 @@ RUN source "/root/.bashrc" \
     && bsdtar -xf "$var_icn_filename"'.tar.bz2' && rm "$var_icn_filename"'.tar.bz2'
 WORKDIR '/root/haproxy_static/jemalloc-'"$jemalloc_version"
 RUN ./configure --prefix=/usr \
-    && make -j "$(nproc)" \
+    && make -j "$(nproc)" CFLAGS="$CFLAGS -fPIC" \
     && make install
 
 FROM step4_jemalloc AS step5_openssl
@@ -84,7 +84,8 @@ RUN source "/root/.bashrc" \
     && bsdtar -xf "openssl-${openssl_github_tag}.tar.gz" && rm "openssl-${openssl_github_tag}.tar.gz"
 WORKDIR "/root/haproxy_static/openssl-${openssl_github_tag}"
 RUN ./config --prefix="$(pwd -P)/.openssl" --release no-deprecated no-shared no-dtls1-method no-tls1_1-method no-sm2 no-sm3 no-sm4 no-rc2 no-rc4 threads CFLAGS='-Os -Wall -fPIC' CXXFLAGS='-Os -Wall -fPIC' LDFLAGS='-fuse-ld=lld' \
-    && make -j "$(nproc)" && make install_sw
+    && make -j "$(nproc)" CFLAGS="$CFLAGS -fPIE -Wl,-pie" \
+    && make install_sw
 
 FROM step5_openssl AS haproxy_builder
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
@@ -96,14 +97,14 @@ RUN source "/root/.bashrc" \
     && bsdtar -xf "haproxy-${haproxy_version}.tar.gz" && rm "haproxy-${haproxy_version}.tar.gz" \
     && cd "haproxy-${haproxy_version}" || exit 1 \
     && make clean \
-    && [[ -d "/root/haproxy_static/openssl-${openssl_github_tag}/.openssl/lib" ]] \
     && make -j "$(nproc)" TARGET=linux-glibc EXTRA_OBJS="contrib/prometheus-exporter/service-prometheus.o" \
     ADDLIB="-ljemalloc $(jemalloc-config --libs)" \
     USE_LUA=1 LUA_INC=/usr/local/include LUA_LIB=/usr/local/lib LUA_LIB_NAME=lua \
     USE_PCRE2_JIT=1 USE_STATIC_PCRE2=1 USE_SYSTEMD=1 \
     USE_OPENSSL=1 SSL_INC="/root/haproxy_static/openssl-${openssl_github_tag}/.openssl/include" SSL_LIB="/root/haproxy_static/openssl-${openssl_github_tag}/.openssl/lib" \
     USE_SLZ=1 SLZ_INC="/root/haproxy_static/libslz/src" SLZ_LIB="/root/haproxy_static/libslz" \
-    checkinstall -y --nodoc --install=no
+    CFLAGS="$CFLAGS -fPIE -Wl,-pie" \
+    && checkinstall -y --nodoc --install=no
 
 FROM haproxy_builder AS haproxy_uploader
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]

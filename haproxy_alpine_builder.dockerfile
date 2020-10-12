@@ -19,11 +19,11 @@ SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 ENV lua_version="5.4.0"
 WORKDIR /root/haproxy_static
 RUN source "/root/.bashrc" \
-RUN make all test \
     && curl -sSROJ "https://www.lua.org/ftp/lua-${lua_version}.tar.gz" \
     && sha1sum "lua-${lua_version}.tar.gz" | grep '8cdbffa8a214a23d190d7c45f38c19518ae62e89' \
     && bsdtar -xf "lua-${lua_version}.tar.gz" && rm "lua-${lua_version}.tar.gz"
 WORKDIR "/root/haproxy_static/lua-${lua_version}"
+RUN make CFLAGS="$CFLAGS -fPIE -Wl,-pie" all test \
     && make install
 
 FROM step1_lua54 AS step2_libslz
@@ -35,7 +35,7 @@ RUN source "/root/.bashrc" \
     && bsdtar -xf "libslz-v${libslz_version}.tar.bz2" && rm "libslz-v${libslz_version}.tar.bz2"
 WORKDIR /root/haproxy_static/libslz
 RUN sed -i -E 's!PREFIX     := \/usr\/local!PREFIX     := /usr!' Makefile \
-    && make static
+    && make CFLAGS="$CFLAGS -fPIE -Wl,-pie" static
 
 FROM step2_libslz AS haproxy_builder
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
@@ -51,7 +51,7 @@ RUN source "/root/.bashrc" \
     USE_PCRE2_JIT=1 USE_STATIC_PCRE2=1 \
     USE_OPENSSL=1 SSL_INC="/usr/include/openssl" SSL_LIB="/usr/lib" \
     USE_SLZ=1 SLZ_INC="/root/haproxy_static/libslz/src" SLZ_LIB="/root/haproxy_static/libslz" \
-    CC=clang LDFLAGS="-fuse-ld=lld -static-pie -static -nolibc -Wl,-Bstatic -L /usr/lib -l:libc.a" \
+    CC=clang CFLAGS="$CFLAGS -fPIE -Wl,-pie" LDFLAGS="$LDFLAGS -static -static-pie -nolibc -Wl,-Bstatic -L /usr/lib -l:libc.a" \
     && cp haproxy haproxy.ori \
     && strip haproxy
 
