@@ -4,13 +4,14 @@ ENV cmake_version="3.18.4"
 ENV netbsd_curses_version="0.3.1"
 ENV gettext_tiny_version="0.3.2"
 RUN apt-get update && apt-get -y install \
-    autoconf automake binutils build-essential ca-certificates checkinstall cmake coreutils curl dos2unix git libarchive-tools libedit-dev libsystemd-dev libtool-bin lld musl-tools ncurses-bin ninja-build pkgconf util-linux --no-install-recommends \
+    autoconf automake binutils build-essential ca-certificates checkinstall checksec cmake coreutils curl dos2unix git libarchive-tools libedit-dev libsystemd-dev libtool-bin lld musl-tools ncurses-bin ninja-build pkgconf util-linux --no-install-recommends \
     && apt-get clean && rm -rf /var/lib/apt/lists/* \
     && ( curl -LROJ4q --retry 5 --retry-delay 10 --retry-max-time 60 "$(curl -sL 'https://api.github.com/repos/ninja-build/ninja/releases/latest' | grep 'browser_download_url' | grep 'ninja-linux.zip' | cut -d\" -f4)" && bsdtar xf ninja-linux.zip && rm /usr/bin/ninja && mv ./ninja /usr/bin/ && rm ninja-linux.zip ) \
     && ( cd /usr || exit 1; curl -LROJ4q --retry 5 --retry-delay 10 --retry-max-time 60 "https://github.com/Kitware/CMake/releases/download/v${cmake_version}/cmake-${cmake_version}-Linux-x86_64.sh" && bash "cmake-${cmake_version}-Linux-x86_64.sh" --skip-license && rm -- "/usr/cmake-${cmake_version}-Linux-x86_64.sh" /usr/bin/cmake-gui /usr/bin/ctest /usr/bin/cpack /usr/bin/ccmake; true ) \
     && update-ca-certificates \
     && update-alternatives --install /usr/local/bin/ld ld /usr/lib/llvm-9/bin/lld 100 \
     && update-alternatives --auto ld \
+    && checksec --update \
     && curl -sSL4q --retry 5 --retry-delay 10 --retry-max-time 60 'https://raw.githubusercontent.com/IceCodeNew/myrc/main/.bashrc' > "/root/.bashrc" \
     && mkdir -p '/root/haproxy_static' \
     && mkdir -p '/usr/local/doc' \
