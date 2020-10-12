@@ -11,8 +11,8 @@ RUN apt-get update && apt-get -y install \
     && update-ca-certificates \
     && update-alternatives --install /usr/local/bin/ld ld /usr/lib/llvm-9/bin/lld 100 \
     && update-alternatives --auto ld \
-    && checksec --update \
-    && curl -sSL4q --retry 5 --retry-delay 10 --retry-max-time 60 'https://raw.githubusercontent.com/IceCodeNew/myrc/main/.bashrc' > "/root/.bashrc" \
+    # && for i in {1..3}; do checksec --update; done; \
+    curl -sSL4q --retry 5 --retry-delay 10 --retry-max-time 60 'https://raw.githubusercontent.com/IceCodeNew/myrc/main/.bashrc' > "/root/.bashrc" \
     && mkdir -p '/root/haproxy_static' \
     && mkdir -p '/usr/local/doc' \
     ### https://github.com/sabotage-linux/netbsd-curses
