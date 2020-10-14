@@ -85,8 +85,8 @@ RUN source "/root/.bashrc" \
     && curl -sSROJ 'https://github.com/openssl/openssl/archive/'"${openssl_github_tag}.tar.gz" \
     && bsdtar -xf "openssl-${openssl_github_tag}.tar.gz" && rm "openssl-${openssl_github_tag}.tar.gz"
 WORKDIR "/root/haproxy_static/openssl-${openssl_github_tag}"
-RUN ./config --prefix="$(pwd -P)/.openssl" --release no-deprecated no-shared no-dtls1-method no-tls1_1-method no-sm2 no-sm3 no-sm4 no-rc2 no-rc4 threads CFLAGS='-Os -Wall -fPIC' CXXFLAGS='-Os -Wall -fPIC' LDFLAGS='-fuse-ld=lld' \
-    && make -j "$(nproc)" CFLAGS="$CFLAGS -fPIE -Wl,-pie" \
+RUN ./config --prefix="$(pwd -P)/.openssl" --release no-deprecated no-shared no-dtls1-method no-tls1_1-method no-sm2 no-sm3 no-sm4 no-rc2 no-rc4 threads CFLAGS="$CFLAGS -fPIC" CXXFLAGS="$CXXFLAGS -fPIC" LDFLAGS='-fuse-ld=lld' \
+    && make -j "$(nproc)" CFLAGS="$CFLAGS -fPIE -Wl,-pie" CXXFLAGS="$CXXFLAGS -fPIE -Wl,-pie" \
     && make install_sw
 
 FROM step5_openssl AS haproxy_builder
