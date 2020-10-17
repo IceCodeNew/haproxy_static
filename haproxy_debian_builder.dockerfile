@@ -5,9 +5,10 @@ ENV cmake_version="3.18.4"
 ENV netbsd_curses_version="0.3.1"
 ENV gettext_tiny_version="0.3.2"
 RUN locale-gen en_US && update-locale LANG=en_US \
-    && apt-get update && apt-get -y install \
-    autoconf automake binutils build-essential ca-certificates checkinstall checksec cmake coreutils curl dos2unix git libarchive-tools libedit-dev libsystemd-dev libtool-bin lld musl-tools ncurses-bin ninja-build pkgconf util-linux --no-install-recommends \
-    && apt-get clean && rm -rf /var/lib/apt/lists/* \
+    && apt-get update && apt-get -y --no-install-recommends install \
+    autoconf automake binutils build-essential ca-certificates checkinstall checksec cmake coreutils curl dos2unix git libarchive-tools libedit-dev libsystemd-dev libtool-bin lld musl-tools ncurses-bin ninja-build pkgconf util-linux \
+    && apt-get clean && apt-get -y --auto-remove -o APT::AutoRemove::RecommendsImportant=false purge \
+    && rm -rf /var/lib/apt/lists/* \
     && ( cd /usr || exit 1; curl -LROJ4q --retry 5 --retry-delay 10 --retry-max-time 60 "https://github.com/Kitware/CMake/releases/download/v${cmake_version}/cmake-${cmake_version}-Linux-x86_64.sh" && bash "cmake-${cmake_version}-Linux-x86_64.sh" --skip-license && rm -- "/usr/cmake-${cmake_version}-Linux-x86_64.sh" /usr/bin/cmake-gui /usr/bin/ctest /usr/bin/cpack /usr/bin/ccmake; true ) \
     && ( curl -LROJ4q --retry 5 --retry-delay 10 --retry-max-time 60 "$(curl -sSL -H "Accept: application/vnd.github.v3+json" 'https://api.github.com/repos/ninja-build/ninja/releases/latest' | grep 'browser_download_url' | grep 'ninja-linux.zip' | cut -d\" -f4)" && bsdtar -xf ninja-linux.zip && rm /usr/bin/ninja ninja-linux.zip && mv ./ninja /usr/bin/ ) \
     && update-ca-certificates \
