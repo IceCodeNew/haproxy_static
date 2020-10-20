@@ -51,7 +51,7 @@ RUN source "/root/.bashrc" \
     USE_PCRE2_JIT=1 USE_STATIC_PCRE2=1 \
     USE_OPENSSL=1 SSL_INC="/usr/include/openssl" SSL_LIB="/usr/lib" \
     USE_SLZ=1 SLZ_INC="/root/haproxy_static/libslz/src" SLZ_LIB="/root/haproxy_static/libslz" \
-    CC=clang CFLAGS="$CFLAGS -fPIE -Wl,-pie" LDFLAGS="$LDFLAGS -static -static-pie -nolibc -Wl,-Bstatic -L /usr/lib -l:libc.a" \
+    CC=clang CFLAGS="$CFLAGS -fPIE -Wl,-pie" LDFLAGS="$LDFLAGS -static-pie -nolibc -Wl,-Bstatic -L /usr/lib -l:libc.a" \
     && cp haproxy haproxy.ori \
     && strip haproxy
 
@@ -80,10 +80,10 @@ RUN github-release release \
     --repo haproxy_static \
     --tag "v${haproxy_version}" \
     --name "haproxy" \
-    --file "/root/haproxy_static/haproxy-${haproxy_version}/haproxy" \
-    && github-release upload \
-    --user IceCodeNew \
-    --repo haproxy_static \
-    --tag "v${haproxy_version}" \
-    --name "haproxy.ori" \
-    --file "/root/haproxy_static/haproxy-${haproxy_version}/haproxy.ori"
+    --file "/root/haproxy_static/haproxy-${haproxy_version}/haproxy"; \
+    # github-release upload \
+    # --user IceCodeNew \
+    # --repo haproxy_static \
+    # --tag "v${haproxy_version}" \
+    # --name "haproxy.ori" \
+    # --file "/root/haproxy_static/haproxy-${haproxy_version}/haproxy.ori"
