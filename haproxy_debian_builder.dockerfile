@@ -1,4 +1,4 @@
-FROM debian/buildd:testing AS base
+FROM debian:testing-slim AS base
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 ARG DEBIAN_FRONTEND=noninteractive
 ENV cmake_version="3.18.4"
@@ -6,6 +6,7 @@ ENV netbsd_curses_version="0.3.1"
 ENV gettext_tiny_version="0.3.2"
 RUN apt-get update && apt-get -y --no-install-recommends install \
     autoconf automake binutils build-essential ca-certificates checkinstall checksec cmake coreutils curl dos2unix git libarchive-tools libedit-dev libsystemd-dev libtool-bin lld locales musl-tools ncurses-bin ninja-build pkgconf util-linux \
+    && apt-get -y full-upgrade \
     && apt-get clean && apt-get -y --auto-remove -o APT::AutoRemove::RecommendsImportant=false purge \
     && rm -rf /var/lib/apt/lists/* \
     && sed -i '/en_US.UTF-8/s/^# //' /etc/locale.gen \
