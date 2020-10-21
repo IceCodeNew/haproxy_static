@@ -118,8 +118,8 @@ ENV GITHUB_TOKEN="set_your_github_token_here"
 RUN echo 'export PATH=$PATH:/usr/local/go/bin' >> ~/.bashrc \
     && echo 'export PATH=$PATH:"$HOME"/go/bin' >> ~/.bashrc \
     && source "/root/.bashrc" \
-    && curl -LROJ 'https://dl.google.com/go/go1.15.2.linux-amd64.tar.gz' \
-    && bsdtar -C /usr/local -xf 'go1.15.2.linux-amd64.tar.gz' && rm 'go1.15.2.linux-amd64.tar.gz' \
+    && curl -LROJ 'https://dl.google.com/go/go1.15.3.linux-amd64.tar.gz' \
+    && bsdtar -C /usr/local -xf 'go1.15.3.linux-amd64.tar.gz' && rm 'go1.15.3.linux-amd64.tar.gz' \
     && go env -w GOFLAGS="$GOFLAGS -buildmode=pie" \
     && go env -w CGO_CFLAGS="$CGO_CFLAGS -O2 -D_FORTIFY_SOURCE=2 -pipe -fexceptions -fstack-clash-protection -fstack-protector-strong -g -grecord-gcc-switches -Wl,-z,noexecstack,-z,relro,-z,now,-z,defs -Wl,--icf=all" \
     && go env -w CGO_CPPFLAGS="$CGO_CPPFLAGS -O2 -D_FORTIFY_SOURCE=2 -pipe -fexceptions -fstack-clash-protection -fstack-protector-strong -g -grecord-gcc-switches -Wl,-z,noexecstack,-z,relro,-z,now,-z,defs -Wl,--icf=all" \
