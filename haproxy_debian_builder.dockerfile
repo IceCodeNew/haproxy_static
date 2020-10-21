@@ -16,7 +16,7 @@ RUN apt-get update && apt-get -y --no-install-recommends install \
     && update-ca-certificates \
     && update-alternatives --install /usr/local/bin/ld ld /usr/lib/llvm-9/bin/lld 100 \
     && update-alternatives --auto ld \
-    # && for i in {1..3}; do checksec --update; done; \
+    && for i in {1..2}; do checksec --update; done; \
     curl -sSL4q --retry 5 --retry-delay 10 --retry-max-time 60 'https://raw.githubusercontent.com/IceCodeNew/myrc/main/.bashrc' > "/root/.bashrc" \
     && mkdir -p '/root/haproxy_static' \
     && mkdir -p '/usr/local/doc' \
@@ -119,8 +119,8 @@ RUN echo 'export PATH=$PATH:/usr/local/go/bin' >> ~/.bashrc \
     && echo 'export PATH=$PATH:"$HOME"/go/bin' >> ~/.bashrc \
     && source "/root/.bashrc" \
     && curl -LROJ 'https://dl.google.com/go/go1.15.2.linux-amd64.tar.gz' \
-    && bsdtar -C /usr/local -xf 'go1.15.2.linux-amd64.tar.gz' && rm 'go1.15.2.linux-amd64.tar.gz'; \
-    go env -w GOFLAGS="$GOFLAGS -buildmode=pie" \
+    && bsdtar -C /usr/local -xf 'go1.15.2.linux-amd64.tar.gz' && rm 'go1.15.2.linux-amd64.tar.gz' \
+    && go env -w GOFLAGS="$GOFLAGS -buildmode=pie" \
     && go env -w CGO_CFLAGS="$CGO_CFLAGS -O2 -D_FORTIFY_SOURCE=2 -pipe -fexceptions -fstack-clash-protection -fstack-protector-strong -g -grecord-gcc-switches -Wl,-z,noexecstack,-z,relro,-z,now,-z,defs -Wl,--icf=all" \
     && go env -w CGO_CPPFLAGS="$CGO_CPPFLAGS -O2 -D_FORTIFY_SOURCE=2 -pipe -fexceptions -fstack-clash-protection -fstack-protector-strong -g -grecord-gcc-switches -Wl,-z,noexecstack,-z,relro,-z,now,-z,defs -Wl,--icf=all" \
     && go env -w CGO_CXXFLAGS="$CGO_CXXFLAGS -O2 -D_FORTIFY_SOURCE=2 -pipe -fexceptions -fstack-clash-protection -fstack-protector-strong -g -grecord-gcc-switches -Wl,-z,noexecstack,-z,relro,-z,now,-z,defs -Wl,--icf=all" \
