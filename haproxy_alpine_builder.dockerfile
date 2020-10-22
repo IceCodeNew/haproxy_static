@@ -1,7 +1,7 @@
 FROM alpine:edge AS base
 SHELL ["/bin/ash", "-eo", "pipefail", "-c"]
 RUN apk update; apk --no-cache add \
-    apk-tools autoconf automake bash bash-completion binutils build-base ca-certificates clang-dev clang-static cmake coreutils curl dos2unix dpkg gettext-tiny-dev git go grep libarchive-tools libedit-dev libedit-static libtool linux-headers lld musl-dev musl-libintl musl-utils ncurses ncurses-dev ncurses-static openssl openssl-dev openssl-libs-static pcre2 pcre2-dev pcre2-tools perl pkgconf samurai util-linux; \
+    apk-tools autoconf automake bash bash-completion binutils build-base ca-certificates clang-dev clang-static cmake coreutils curl dos2unix dpkg gettext-tiny-dev git grep libarchive-tools libedit-dev libedit-static libtool linux-headers lld musl-dev musl-libintl musl-utils ncurses ncurses-dev ncurses-static openssl openssl-dev openssl-libs-static pcre2 pcre2-dev pcre2-tools perl pkgconf samurai util-linux; \
     apk --no-cache upgrade; \
     update-alternatives --install /usr/local/bin/cc cc /usr/bin/clang 100; \
     update-alternatives --install /usr/local/bin/c++ c++ /usr/bin/clang++ 100; \
@@ -59,16 +59,9 @@ FROM haproxy_builder AS haproxy_uploader
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 ENV haproxy_version="2.2.4"
 ENV GITHUB_TOKEN="set_your_github_token_here"
+COPY got_github_release.sh /tmp/got_github_release.sh
 RUN source "/root/.bashrc" \
-    && go env -w GOFLAGS="$GOFLAGS -buildmode=pie" \
-    && go env -w CGO_CFLAGS="$CGO_CFLAGS -O2 -D_FORTIFY_SOURCE=2 -pipe -fexceptions -fstack-clash-protection -fstack-protector-strong -g -grecord-gcc-switches -Wl,-z,noexecstack,-z,relro,-z,now,-z,defs -Wl,--icf=all" \
-    && go env -w CGO_CXXFLAGS="$CGO_CXXFLAGS -O2 -D_FORTIFY_SOURCE=2 -pipe -fexceptions -fstack-clash-protection -fstack-protector-strong -g -grecord-gcc-switches -Wl,-z,noexecstack,-z,relro,-z,now,-z,defs -Wl,--icf=all" \
-    && go env -w CGO_LDFLAGS="$CGO_LDFLAGS -fuse-ld=lld -Wl,-z,noexecstack,-z,relro,-z,now,-z,defs -Wl,--icf=all" \
-    # && go env -w GO111MODULE=on \
-    # && go env -w GOPROXY=https://goproxy.cn,direct \
-    && go get -u -v github.com/github-release/github-release \
-    && mv -f "$HOME/go/bin"/* '/usr/local/bin' \
-    && rm -r "$HOME/.cache/go-build" "$HOME/go"
+    && bash /tmp/got_github_release.sh
 WORKDIR "/root/haproxy_static/haproxy-${haproxy_version}"
 RUN github-release release \
     --user IceCodeNew \

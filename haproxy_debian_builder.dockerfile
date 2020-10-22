@@ -116,21 +116,9 @@ FROM haproxy_builder AS haproxy_uploader
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 ENV haproxy_version="2.2.4"
 ENV GITHUB_TOKEN="set_your_github_token_here"
-RUN echo 'export PATH=$PATH:/usr/local/go/bin' >> ~/.bashrc \
-    && echo 'export PATH=$PATH:"$HOME"/go/bin' >> ~/.bashrc \
-    && source "/root/.bashrc" \
-    && curl -LROJ 'https://dl.google.com/go/go1.15.3.linux-amd64.tar.gz' \
-    && bsdtar -C /usr/local -xf 'go1.15.3.linux-amd64.tar.gz' && rm 'go1.15.3.linux-amd64.tar.gz' \
-    && go env -w GOFLAGS="$GOFLAGS -buildmode=pie" \
-    && go env -w CGO_CFLAGS="$CGO_CFLAGS -O2 -D_FORTIFY_SOURCE=2 -pipe -fexceptions -fstack-clash-protection -fstack-protector-strong -g -grecord-gcc-switches -Wl,-z,noexecstack,-z,relro,-z,now,-z,defs -Wl,--icf=all" \
-    && go env -w CGO_CPPFLAGS="$CGO_CPPFLAGS -O2 -D_FORTIFY_SOURCE=2 -pipe -fexceptions -fstack-clash-protection -fstack-protector-strong -g -grecord-gcc-switches -Wl,-z,noexecstack,-z,relro,-z,now,-z,defs -Wl,--icf=all" \
-    && go env -w CGO_CXXFLAGS="$CGO_CXXFLAGS -O2 -D_FORTIFY_SOURCE=2 -pipe -fexceptions -fstack-clash-protection -fstack-protector-strong -g -grecord-gcc-switches -Wl,-z,noexecstack,-z,relro,-z,now,-z,defs -Wl,--icf=all" \
-    && go env -w CGO_LDFLAGS="$CGO_LDFLAGS -fuse-ld=lld -Wl,-z,noexecstack,-z,relro,-z,now,-z,defs -Wl,--icf=all" \
-    # && go env -w GO111MODULE=on \
-    # && go env -w GOPROXY=https://goproxy.cn,direct \
-    && go get -u -v github.com/github-release/github-release \
-    && mv -f "$HOME/go/bin"/* '/usr/local/bin' \
-    && rm -r "$HOME/.cache/go-build" "$HOME/go"
+COPY got_github_release.sh /tmp/got_github_release.sh
+RUN source "/root/.bashrc" \
+    && bash /tmp/got_github_release.sh
 WORKDIR "/root/haproxy_static/haproxy-${haproxy_version}"
 RUN github-release release \
     --user IceCodeNew \
