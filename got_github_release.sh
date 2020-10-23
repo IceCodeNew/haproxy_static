@@ -17,7 +17,7 @@ curl_to_dest() {
     tmp_dir=$(mktemp -d)
     pushd "$tmp_dir" || exit 1
     if $(type -P curl) -LROJq --retry 5 --retry-delay 10 --retry-max-time 60 "$1"; then
-      find . -maxdepth 1 -type f -print0 | xargs -0 -i -r -s 2000 sudo "$(type -P install)" -pvD "{}" "$2"
+      find . -maxdepth 1 -type f -print0 | xargs -0 -i -r -s 2000 "$(type -P install)" -pvD "{}" "$2"
     fi
     popd || exit 1
     /bin/rm -rf "$tmp_dir"
@@ -27,7 +27,7 @@ curl_to_dest() {
 
 ################
 
-sudo mkdir -p /usr/local/bin
+mkdir -p /usr/local/bin
 go_collection_tag_name=$(curl -sSL -H "Accept: application/vnd.github.v3+json" \
   'https://api.github.com/repos/IceCodeNew/go-collection/releases/latest' |
   grep 'tag_name' | cut -d\" -f4)
