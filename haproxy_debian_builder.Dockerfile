@@ -111,23 +111,3 @@ RUN source "/root/.bashrc" \
     USE_SLZ=1 SLZ_INC="/root/haproxy_static/libslz/src" SLZ_LIB="/root/haproxy_static/libslz" \
     CFLAGS="$CFLAGS -fPIE -Wl,-pie" \
     && checkinstall -y --nodoc --install=no
-
-FROM haproxy_builder AS haproxy_uploader
-SHELL ["/bin/bash", "-o", "pipefail", "-c"]
-ENV haproxy_version="2.2.4"
-ENV GITHUB_TOKEN="set_your_github_token_here"
-COPY got_github_release.sh /tmp/got_github_release.sh
-RUN source "/root/.bashrc" \
-    && bash /tmp/got_github_release.sh
-WORKDIR "/root/haproxy_static/haproxy-${haproxy_version}"
-RUN github-release release \
-    --user IceCodeNew \
-    --repo haproxy_static \
-    --tag "v${haproxy_version}" \
-    --name "v${haproxy_version}"; \
-    github-release upload \
-    --user IceCodeNew \
-    --repo haproxy_static \
-    --tag "v${haproxy_version}" \
-    --name "haproxy_${haproxy_version}-1_amd64.deb" \
-    --file "/root/haproxy_static/haproxy-${haproxy_version}/haproxy_${haproxy_version}-1_amd64.deb"

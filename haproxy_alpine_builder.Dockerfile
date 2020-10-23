@@ -54,29 +54,3 @@ RUN source "/root/.bashrc" \
     CC=clang CFLAGS="$CFLAGS -fPIE -Wl,-pie" LDFLAGS="$LDFLAGS -static-pie -nolibc -Wl,-Bstatic -L /usr/lib -l:libc.a" \
     && cp haproxy haproxy.ori \
     && strip haproxy
-
-FROM haproxy_builder AS haproxy_uploader
-SHELL ["/bin/bash", "-o", "pipefail", "-c"]
-ENV haproxy_version="2.2.4"
-ENV GITHUB_TOKEN="set_your_github_token_here"
-COPY got_github_release.sh /tmp/got_github_release.sh
-RUN source "/root/.bashrc" \
-    && bash /tmp/got_github_release.sh
-WORKDIR "/root/haproxy_static/haproxy-${haproxy_version}"
-RUN github-release release \
-    --user IceCodeNew \
-    --repo haproxy_static \
-    --tag "v${haproxy_version}" \
-    --name "v${haproxy_version}"; \
-    github-release upload \
-    --user IceCodeNew \
-    --repo haproxy_static \
-    --tag "v${haproxy_version}" \
-    --name "haproxy" \
-    --file "/root/haproxy_static/haproxy-${haproxy_version}/haproxy"; \
-    # github-release upload \
-    # --user IceCodeNew \
-    # --repo haproxy_static \
-    # --tag "v${haproxy_version}" \
-    # --name "haproxy.ori" \
-    # --file "/root/haproxy_static/haproxy-${haproxy_version}/haproxy.ori"
