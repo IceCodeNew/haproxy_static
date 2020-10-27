@@ -109,6 +109,7 @@ SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 ARG haproxy_branch='2.2'
 ## curl -sSL "https://git.haproxy.org/?p=haproxy-${haproxy_branch}.git;a=commit;h=refs/heads/master" | tr -d '\r\n\t' | grep -Po '(?<=<td>commit<\/td><td class="sha1">)[a-zA-Z0-9]+(?=<\/td>)'
 ARG haproxy_latest_commit_hash='f495e5d6a597e2e1caa965e963ef16103da545db'
+ARG openssl_latest_tag_name='OpenSSL_1_1_1h'
 WORKDIR /root/haproxy_static
 RUN source '/root/.bashrc' \
     && curl -sSR -o "haproxy-${haproxy_branch}.tar.gz" "https://git.haproxy.org/?p=haproxy-${haproxy_branch}.git;a=snapshot;h=${haproxy_latest_commit_hash};sf=tgz" \
