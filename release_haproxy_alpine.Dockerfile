@@ -1,9 +1,10 @@
 # syntax = docker/dockerfile:1.0-experimental
 FROM quay.io/icecodenew/haproxy_static:alpine AS haproxy_uploader
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
-ENV haproxy_version="2.2.4"
+ARG haproxy_branch='2.2'
+ARG haproxy_latest_tag_name='2.2.4'
 COPY got_github_release.sh /tmp/got_github_release.sh
-WORKDIR "/root/haproxy_static/haproxy-${haproxy_version}"
+WORKDIR "/root/haproxy_static/haproxy-${haproxy_branch}"
 # import secret:
 RUN --mount=type=secret,id=GIT_AUTH_TOKEN,dst=/tmp/secret_token export GITHUB_TOKEN="$(cat /tmp/secret_token)" \
     && source "/root/.bashrc" \
@@ -11,17 +12,17 @@ RUN --mount=type=secret,id=GIT_AUTH_TOKEN,dst=/tmp/secret_token export GITHUB_TO
     && github-release release \
     --user IceCodeNew \
     --repo haproxy_static \
-    --tag "v${haproxy_version}" \
-    --name "v${haproxy_version}"; \
+    --tag "v${haproxy_latest_tag_name}" \
+    --name "v${haproxy_latest_tag_name}"; \
     github-release upload \
     --user IceCodeNew \
     --repo haproxy_static \
-    --tag "v${haproxy_version}" \
+    --tag "v${haproxy_latest_tag_name}" \
     --name "haproxy" \
-    --file "/root/haproxy_static/haproxy-${haproxy_version}/haproxy"; \
+    --file "/root/haproxy_static/haproxy-${haproxy_branch}/haproxy"; \
     # github-release upload \
     # --user IceCodeNew \
     # --repo haproxy_static \
-    # --tag "v${haproxy_version}" \
+    # --tag "v${haproxy_latest_tag_name}" \
     # --name "haproxy.ori" \
-    # --file "/root/haproxy_static/haproxy-${haproxy_version}/haproxy.ori"
+    # --file "/root/haproxy_static/haproxy-${haproxy_branch}/haproxy.ori"
