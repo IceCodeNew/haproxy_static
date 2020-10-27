@@ -45,7 +45,7 @@ FROM base AS step1_pcre2
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 ARG pcre2_version='10.35'
 WORKDIR /root/haproxy_static
-RUN source "/root/.bashrc" \
+RUN source '/root/.bashrc' \
     && curl -sSROJ "https://ftp.pcre.org/pub/pcre/pcre2-${pcre2_version}.tar.bz2" \
     && bsdtar -xf "pcre2-${pcre2_version}.tar.bz2" && rm "pcre2-${pcre2_version}.tar.bz2"
 WORKDIR "/root/haproxy_static/pcre2-${pcre2_version}"
@@ -57,7 +57,7 @@ FROM step1_pcre2 AS step2_lua54
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 ARG lua_version='5.4.0'
 WORKDIR /root/haproxy_static
-RUN source "/root/.bashrc" \
+RUN source '/root/.bashrc' \
     && curl -sSROJ "https://www.lua.org/ftp/lua-${lua_version}.tar.gz" \
     && sha1sum "lua-${lua_version}.tar.gz" | grep '8cdbffa8a214a23d190d7c45f38c19518ae62e89' \
     && bsdtar -xf "lua-${lua_version}.tar.gz" && rm "lua-${lua_version}.tar.gz"
@@ -69,7 +69,7 @@ FROM step2_lua54 AS step3_libslz
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 ARG libslz_version='1.2.0'
 WORKDIR /root/haproxy_static
-RUN source "/root/.bashrc" \
+RUN source '/root/.bashrc' \
     && curl -sSROJ "http://git.1wt.eu/web?p=libslz.git;a=snapshot;h=v${libslz_version};sf=tbz2" \
     && bsdtar -xf "libslz-v${libslz_version}.tar.bz2" && rm "libslz-v${libslz_version}.tar.bz2"
 WORKDIR /root/haproxy_static/libslz
@@ -81,7 +81,7 @@ SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 # https://api.github.com/repos/jemalloc/jemalloc/releases/latest
 ARG jemalloc_latest_tag_name='5.2.1'
 WORKDIR /root/haproxy_static
-RUN source "/root/.bashrc" \
+RUN source '/root/.bashrc' \
     && var_icn_filename="jemalloc-${jemalloc_latest_tag_name}.tar.bz2" \
     && var_icn_download="https://github.com/jemalloc/jemalloc/releases/download/${jemalloc_latest_tag_name}/${var_icn_filename}" \
     && curl -sSR -o "$var_icn_filename" -- "$var_icn_download" \
@@ -96,7 +96,7 @@ SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 # https://api.github.com/repos/openssl/openssl/tags?per_page=100
 ARG openssl_latest_tag_name='OpenSSL_1_1_1h'
 WORKDIR /root/haproxy_static
-RUN source "/root/.bashrc" \
+RUN source '/root/.bashrc' \
     && curl -sSROJ "https://github.com/openssl/openssl/archive/${openssl_latest_tag_name}.tar.gz" \
     && bsdtar -xf "openssl-${openssl_latest_tag_name}.tar.gz" && rm "openssl-${openssl_latest_tag_name}.tar.gz"
 WORKDIR "/root/haproxy_static/openssl-${openssl_latest_tag_name}"
@@ -110,7 +110,7 @@ ARG haproxy_branch='2.2'
 ## curl -sSL "https://git.haproxy.org/?p=haproxy-${haproxy_branch}.git;a=commit;h=refs/heads/master" | tr -d '\r\n\t' | grep -Po '(?<=<td>commit<\/td><td class="sha1">)[a-zA-Z0-9]+(?=<\/td>)'
 ARG haproxy_latest_commit_hash='f495e5d6a597e2e1caa965e963ef16103da545db'
 WORKDIR /root/haproxy_static
-RUN source "/root/.bashrc" \
+RUN source '/root/.bashrc' \
     && curl -sSR -o "haproxy-${haproxy_branch}.tar.gz" "https://git.haproxy.org/?p=haproxy-${haproxy_branch}.git;a=snapshot;h=${haproxy_latest_commit_hash};sf=tgz" \
     && mkdir "haproxy-${haproxy_branch}" \
     && bsdtar -xf "haproxy-${haproxy_branch}.tar.gz" --strip-components 1 -C "haproxy-${haproxy_branch}" && rm "haproxy-${haproxy_branch}.tar.gz" \
