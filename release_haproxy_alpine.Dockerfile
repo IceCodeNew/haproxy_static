@@ -9,6 +9,10 @@ WORKDIR "/root/haproxy_static/haproxy-${haproxy_branch}"
 RUN --mount=type=secret,id=GIT_AUTH_TOKEN,dst=/tmp/secret_token export GITHUB_TOKEN="$(cat /tmp/secret_token)" \
     && source "/root/.bashrc" \
     && bash /tmp/got_github_release.sh \
+    && github-release delete \
+    --user IceCodeNew \
+    --repo haproxy_static \
+    --tag "v${haproxy_latest_tag_name}" \
     && github-release release \
     --user IceCodeNew \
     --repo haproxy_static \
