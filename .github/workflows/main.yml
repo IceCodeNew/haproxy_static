@@ -1,12 +1,11 @@
-name: Daily build
+name: Bump
 
 on:
   schedule:
-    - cron: "0 2 * * *"
+    - cron: "50 1-23/8 * * *"
   push:
     branches:
       - master
-      - release
     paths-ignore:
       - "**/LICENSE"
       - "**/README.md"
@@ -14,12 +13,11 @@ on:
   # pull_request:
   #   branches:
   #     - master
-  #     - develop
 
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
-  # This workflow contains a single job called "Daily-build"
-  Daily-build:
+  # This workflow contains a single job called "Bump"
+  Bump:
     # The type of runner that the job will run on
     runs-on: ubuntu-latest
 
@@ -34,12 +32,65 @@ jobs:
           echo "RELEASE_NAME=$(date +%Y%m%d%H%M%S)" >> $GITHUB_ENV
           echo "TAG_NAME=$(date +%Y%m%d%H%M%S)" >> $GITHUB_ENV
           echo "REPO_URL=github.com/${{ github.repository }}" >> $GITHUB_ENV
+          echo "checksec_latest_tag_name=$(curl -sSL -H 'Accept: application/vnd.github.v3+json' \
+                  'https://api.github.com/repos/slimm609/checksec.sh/releases/latest' |
+                  grep -F 'tag_name' | cut -d'"' -f4)" >> $GITHUB_ENV
+          echo "bashrc_latest_commit_hash=$(curl -sL -H 'Accept: application/vnd.github.v3+json' \
+                  'https://api.github.com/repos/IceCodeNew/myrc/commits?per_page=1&path=.bashrc' |
+                  grep -Fm1 'sha' | cut -d'"' -f4)" >> $GITHUB_ENV
+          echo "openssl_latest_tag_name=$(curl -sSL -H 'Accept: application/vnd.github.v3+json' \
+                  "https://api.github.com/repos/openssl/openssl/tags?per_page=100" |
+                  grep -F 'name' | cut -d'"' -f4 | grep -Em1 '^OpenSSL_1_[0-9]_[0-9][a-zA-Z]')" >> $GITHUB_ENV
+          echo "cmake_latest_tag_name=$(curl -sSL -H 'Accept: application/vnd.github.v3+json' \
+                  'https://api.github.com/repos/Kitware/CMake/releases/latest' |
+                  grep -F 'tag_name' | cut -d'"' -f4)" >> $GITHUB_ENV
+          echo "ninja_latest_tag_name=$(curl -sL -H 'Accept: application/vnd.github.v3+json' \
+                  'https://api.github.com/repos/ninja-build/ninja/releases/latest' |
+                  grep -F 'tag_name' | cut -d'"' -f4)" >> $GITHUB_ENV
+          echo "netbsd_curses_tag_name=$(curl -sL -H 'Accept: application/vnd.github.v3+json' \
+                  'https://api.github.com/repos/sabotage-linux/netbsd-curses/releases/latest' |
+                  grep -F 'tag_name' | cut -d'"' -f4 | sed -E 's/^v//')" >> $GITHUB_ENV
+          echo "gettext_tiny_tag_name=$(curl -sL -H 'Accept: application/vnd.github.v3+json' \
+                  'https://api.github.com/repos/sabotage-linux/gettext-tiny/releases/latest' |
+                  grep -F 'tag_name' | cut -d'"' -f4 | sed -E 's/^v//')" >> $GITHUB_ENV
+          echo "jemalloc_latest_tag_name=$(curl -sL -H 'Accept: application/vnd.github.v3+json' \
+                  'https://api.github.com/repos/jemalloc/jemalloc/releases/latest' |
+                  grep -F 'tag_name' | cut -d'"' -f4)" >> $GITHUB_ENV
+          echo "haproxy_branch=2.2" >> $GITHUB_ENV
+          echo "haproxy_latest_commit_hash=$(export haproxy_branch=2.2 && curl -sSL \
+                  "https://git.haproxy.org/?p=haproxy-${haproxy_branch}.git;a=commit;h=refs/heads/master" | tr -d '\r\n\t' |
+                  grep -Po '(?<=<td>commit<\/td><td class="sha1">)[a-zA-Z0-9]+(?=<\/td>)')" >> $GITHUB_ENV
+          echo "haproxy_latest_tag_name=$(export haproxy_branch=2.2 && curl -sSL \
+                  "https://git.haproxy.org/?p=haproxy-${haproxy_branch}.git;a=tags" | tr -d '\r\n\t' |
+                  grep -Po '(?<=a=shortlog;h=refs\/tags\/v)2\.2\.4')" >> $GITHUB_ENV
+          echo "cachebust=$(date +%s)" >> $GITHUB_ENV
         shell: bash
       # Runs a set of commands using the runners shell
-      - name: git rm got_github_release.sh
+      - name: Bump
         run: |
-          # python3 -m pip install -U pip
-          # python3 -m pip install -U pip setuptools wheel git-filter-repo
+          git config --local user.name "actions"
+          git config --local user.email "action@github.com"
+          git reset --hard origin/master
+          sed -i -E "s/^ARG checksec_latest_tag_name=.+/ARG checksec_latest_tag_name=${checksec_latest_tag_name:?empty value}/" haproxy_alpine_builder.Dockerfile haproxy_debian_builder.Dockerfile
+          sed -i -E "s/^ARG bashrc_latest_commit_hash=.+/ARG bashrc_latest_commit_hash=${bashrc_latest_commit_hash:?empty value}/" haproxy_alpine_builder.Dockerfile haproxy_debian_builder.Dockerfile
+          sed -i -E "s/^ARG pcre2_version=.+/ARG pcre2_version=10.35/" haproxy_alpine_builder.Dockerfile haproxy_debian_builder.Dockerfile
+          sed -i -E "s/^ARG openssl_latest_tag_name=.+/ARG openssl_latest_tag_name=${openssl_latest_tag_name:?empty value}/" haproxy_alpine_builder.Dockerfile haproxy_debian_builder.Dockerfile
+          sed -i -E "s/^ARG cmake_latest_tag_name=.+/ARG cmake_latest_tag_name=${cmake_latest_tag_name:?empty value}/" haproxy_alpine_builder.Dockerfile haproxy_debian_builder.Dockerfile
+          sed -i -E "s/^ARG ninja_latest_tag_name=.+/ARG ninja_latest_tag_name=${ninja_latest_tag_name:?empty value}/" haproxy_alpine_builder.Dockerfile haproxy_debian_builder.Dockerfile
+          sed -i -E "s/^ARG netbsd_curses_tag_name=.+/ARG netbsd_curses_tag_name=${netbsd_curses_tag_name:?empty value}/" haproxy_alpine_builder.Dockerfile haproxy_debian_builder.Dockerfile
+          sed -i -E "s/^ARG gettext_tiny_tag_name=.+/ARG gettext_tiny_tag_name=${gettext_tiny_tag_name:?empty value}/" haproxy_alpine_builder.Dockerfile haproxy_debian_builder.Dockerfile
+          sed -i -E "s/^ARG jemalloc_latest_tag_name=.+/ARG jemalloc_latest_tag_name=${jemalloc_latest_tag_name:?empty value}/" haproxy_alpine_builder.Dockerfile haproxy_debian_builder.Dockerfile
+          sed -i -E "s/^ARG haproxy_branch=.+/ARG haproxy_branch=${haproxy_branch:?empty value}/" haproxy_alpine_builder.Dockerfile haproxy_debian_builder.Dockerfile
+          sed -i -E "s/^ARG haproxy_latest_commit_hash=.+/ARG haproxy_latest_commit_hash=${haproxy_latest_commit_hash:?empty value}/" haproxy_alpine_builder.Dockerfile haproxy_debian_builder.Dockerfile
+          sed -i -E "s/^ARG haproxy_latest_tag_name=.+/ARG haproxy_latest_tag_name=${haproxy_latest_tag_name:?empty value}/" haproxy_alpine_builder.Dockerfile haproxy_debian_builder.Dockerfile
+          sed -i -E "s/^ARG lua_version=.+/ARG lua_version=5.4.0/" haproxy_alpine_builder.Dockerfile haproxy_debian_builder.Dockerfile
+          sed -i -E "s/^ARG libslz_version=.+/ARG libslz_version=1.2.0/" haproxy_alpine_builder.Dockerfile haproxy_debian_builder.Dockerfile
+          sed -i -E "s/^ARG cachebust=.+/ARG cachebust=${cachebust:?empty value}/" haproxy_alpine_builder.Dockerfile haproxy_debian_builder.Dockerfile
+          git add haproxy_alpine_builder.Dockerfile haproxy_debian_builder.Dockerfile
+          git commit -m "Bump"
+          git push -u origin master
+      - name: Force push `release` branch
+        run: |
           git config --local user.name "actions"
           git config --local user.email "action@github.com"
           git checkout release
