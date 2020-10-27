@@ -89,7 +89,7 @@ RUN source '/root/.bashrc' \
 WORKDIR "/root/haproxy_static/jemalloc-${jemalloc_latest_tag_name}"
 RUN ./configure --prefix=/usr \
     && make -j "$(nproc)" CFLAGS="$CFLAGS -fPIC" \
-    && make install
+    && checkinstall -y --nodoc --pkgversion="$jemalloc_latest_tag_name"
 
 FROM step4_jemalloc AS step5_openssl
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
@@ -111,6 +111,8 @@ ARG haproxy_branch='2.2'
 ## curl -sSL "https://git.haproxy.org/?p=haproxy-${haproxy_branch}.git;a=commit;h=refs/heads/master" | tr -d '\r\n\t' | grep -Po '(?<=<td>commit<\/td><td class="sha1">)[a-zA-Z0-9]+(?=<\/td>)'
 ARG haproxy_latest_commit_hash='f495e5d6a597e2e1caa965e963ef16103da545db'
 ARG openssl_latest_tag_name='1.1.1i-dev'
+ARG jemalloc_latest_tag_name='5.2.1'
+COPY --from=step4_jemalloc "/root/haproxy_static/jemalloc-${jemalloc_latest_tag_name}/jemalloc_${jemalloc_latest_tag_name}-1_amd64.deb" "/root/haproxy_static/haproxy-${haproxy_version}/jemalloc_${jemalloc_latest_tag_name}-1_amd64.deb"
 WORKDIR /root/haproxy_static
 RUN source '/root/.bashrc' \
     && curl -sSR -o "haproxy-${haproxy_branch}.tar.gz" "https://git.haproxy.org/?p=haproxy-${haproxy_branch}.git;a=snapshot;h=${haproxy_latest_commit_hash};sf=tgz" \
