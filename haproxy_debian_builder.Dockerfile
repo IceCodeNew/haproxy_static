@@ -24,9 +24,9 @@ RUN apt-get update && apt-get -y --no-install-recommends install \
     && ( cd /usr || exit 1; curl -LROJ4q --retry 5 --retry-delay 10 --retry-max-time 60 "https://github.com/Kitware/CMake/releases/download/${cmake_latest_tag_name}/cmake-${cmake_latest_tag_name#v}-Linux-x86_64.sh" && bash "cmake-${cmake_latest_tag_name#v}-Linux-x86_64.sh" --skip-license && rm -f -- "/usr/cmake-${cmake_latest_tag_name#v}-Linux-x86_64.sh" '/usr/bin/cmake-gui' '/usr/bin/ctest' '/usr/bin/cpack' '/usr/bin/ccmake'; true ) \
     && ( curl -LROJ4q --retry 5 --retry-delay 10 --retry-max-time 60 "https://github.com/ninja-build/ninja/releases/download/${ninja_latest_tag_name}/ninja-linux.zip" && bsdtar -xf ninja-linux.zip && install -pvD "./ninja" "/usr/bin/" && rm -f -- './ninja' 'ninja-linux.zip' ) \
     # && update-ca-certificates \
-    && update-alternatives --install /usr/local/bin/ld ld /usr/lib/llvm-9/bin/lld 100 \
-    && update-alternatives --auto ld \
     # && for i in {1..2}; do checksec --update; done \
+    && update-alternatives --install /usr/local/bin/ld ld /usr/bin/lld 100 \
+    && update-alternatives --auto ld \
     && curl -sSL4q --retry 5 --retry-delay 10 --retry-max-time 60 -o '/root/.bashrc' "https://raw.githubusercontent.com/IceCodeNew/myrc/${bashrc_latest_commit_hash}/.bashrc" \
     && mkdir -p '/root/haproxy_static' \
     && mkdir -p '/usr/local/doc' \
