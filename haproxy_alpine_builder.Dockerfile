@@ -12,9 +12,9 @@ ARG cmake_latest_tag_name='v3.18.4'
 # https://api.github.com/repos/ninja-build/ninja/releases/latest
 ARG ninja_latest_tag_name='v1.10.1'
 # https://api.github.com/repos/sabotage-linux/netbsd-curses/releases/latest
-ARG netbsd_curses_tag_name="v0.3.1"
+ARG netbsd_curses_tag_name='0.3.1'
 # https://api.github.com/repos/sabotage-linux/gettext-tiny/releases/latest
-ARG gettext_tiny_tag_name="v0.3.2"
+ARG gettext_tiny_tag_name='0.3.2'
 RUN apk update; apk --no-progress --no-cache add \
     apk-tools autoconf automake bash binutils build-base ca-certificates clang-dev clang-static cmake coreutils curl dos2unix dpkg file gettext-tiny-dev git grep libarchive-tools libedit-dev libedit-static libtool linux-headers lld musl musl-dev musl-libintl musl-utils ncurses ncurses-dev ncurses-static openssl openssl-dev openssl-libs-static pcre2 pcre2-dev pcre2-tools perl pkgconf samurai util-linux; \
     apk --no-progress --no-cache upgrade; \
@@ -32,7 +32,7 @@ RUN apk update; apk --no-progress --no-cache add \
 
 FROM base AS step1_lua54
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
-ARG lua_version="5.4.0"
+ARG lua_version='5.4.0'
 WORKDIR /root/haproxy_static
 RUN source "/root/.bashrc" \
     && curl -sSROJ "https://www.lua.org/ftp/lua-${lua_version}.tar.gz" \
@@ -44,7 +44,7 @@ RUN make CFLAGS="$CFLAGS -fPIE -Wl,-pie" all test \
 
 FROM step1_lua54 AS step2_libslz
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
-ARG libslz_version="1.2.0"
+ARG libslz_version='1.2.0'
 WORKDIR /root/haproxy_static
 RUN source "/root/.bashrc" \
     && curl -sSROJ "http://git.1wt.eu/web?p=libslz.git;a=snapshot;h=v${libslz_version};sf=tbz2" \

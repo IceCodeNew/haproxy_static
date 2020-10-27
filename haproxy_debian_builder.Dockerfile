@@ -10,11 +10,11 @@ ARG cmake_latest_tag_name='v3.18.4'
 # https://api.github.com/repos/ninja-build/ninja/releases/latest
 ARG ninja_latest_tag_name='v1.10.1'
 # https://api.github.com/repos/sabotage-linux/netbsd-curses/releases/latest
-ARG netbsd_curses_tag_name="v0.3.1"
+ARG netbsd_curses_tag_name='0.3.1'
 # https://api.github.com/repos/sabotage-linux/gettext-tiny/releases/latest
-ARG gettext_tiny_tag_name="v0.3.2"
+ARG gettext_tiny_tag_name='0.3.2'
 RUN apt-get update && apt-get -y --no-install-recommends install \
-    autoconf automake binutils build-essential ca-certificates checkinstall checksec cmake coreutils curl dos2unix git libarchive-tools libedit-dev libsystemd-dev libtool-bin lld locales musl-tools ncurses-bin ninja-build pkgconf util-linux \
+    apt-utils autoconf automake binutils build-essential ca-certificates checkinstall checksec cmake coreutils curl dos2unix git libarchive-tools libedit-dev libsystemd-dev libtool-bin lld locales musl-tools ncurses-bin ninja-build pkgconf util-linux \
     && apt-get -y full-upgrade \
     && apt-get clean && apt-get -y --auto-remove -o APT::AutoRemove::RecommendsImportant=false purge \
     && rm -rf /var/lib/apt/lists/* \
@@ -26,8 +26,8 @@ RUN apt-get update && apt-get -y --no-install-recommends install \
     # && update-ca-certificates \
     && update-alternatives --install /usr/local/bin/ld ld /usr/lib/llvm-9/bin/lld 100 \
     && update-alternatives --auto ld \
-    && for i in {1..2}; do checksec --update; done; \
-    curl -sSL4q --retry 5 --retry-delay 10 --retry-max-time 60 -o '/root/.bashrc' "https://raw.githubusercontent.com/IceCodeNew/myrc/${bashrc_latest_commit_hash}/.bashrc" \
+    # && for i in {1..2}; do checksec --update; done \
+    && curl -sSL4q --retry 5 --retry-delay 10 --retry-max-time 60 -o '/root/.bashrc' "https://raw.githubusercontent.com/IceCodeNew/myrc/${bashrc_latest_commit_hash}/.bashrc" \
     && mkdir -p '/root/haproxy_static' \
     && mkdir -p '/usr/local/doc' \
     ### https://github.com/sabotage-linux/netbsd-curses
@@ -55,7 +55,7 @@ RUN ./configure --enable-jit --enable-jit-sealloc \
 
 FROM step1_pcre2 AS step2_lua54
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
-ARG lua_version="5.4.0"
+ARG lua_version='5.4.0'
 WORKDIR /root/haproxy_static
 RUN source "/root/.bashrc" \
     && curl -sSROJ "https://www.lua.org/ftp/lua-${lua_version}.tar.gz" \
@@ -67,7 +67,7 @@ RUN make CFLAGS="$CFLAGS -fPIE -Wl,-pie" all test \
 
 FROM step2_lua54 AS step3_libslz
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
-ARG libslz_version="1.2.0"
+ARG libslz_version='1.2.0'
 WORKDIR /root/haproxy_static
 RUN source "/root/.bashrc" \
     && curl -sSROJ "http://git.1wt.eu/web?p=libslz.git;a=snapshot;h=v${libslz_version};sf=tbz2" \
