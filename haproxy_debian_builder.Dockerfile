@@ -114,8 +114,6 @@ ARG haproxy_branch=2.2
 ARG haproxy_latest_commit_hash=f495e5d6a597e2e1caa965e963ef16103da545db
 ARG haproxy_latest_tag_name=2.2.4
 ARG openssl_latest_tag_name=1.1.1i-dev
-ARG jemalloc_latest_tag_name=5.2.1
-COPY --from=step4_jemalloc "/root/haproxy_static/jemalloc-${jemalloc_latest_tag_name}/jemalloc_${jemalloc_latest_tag_name}-1_amd64.deb" "/root/haproxy_static/haproxy-${haproxy_branch}/jemalloc_${jemalloc_latest_tag_name}-1_amd64.deb"
 WORKDIR /root/haproxy_static
 RUN source '/root/.bashrc' \
     && curl -sSR -o "haproxy-${haproxy_branch}.tar.gz" "https://git.haproxy.org/?p=haproxy-${haproxy_branch}.git;a=snapshot;h=${haproxy_latest_commit_hash};sf=tgz" \
@@ -131,3 +129,10 @@ RUN source '/root/.bashrc' \
     USE_SLZ=1 SLZ_INC="/root/haproxy_static/libslz/src" SLZ_LIB="/root/haproxy_static/libslz" \
     CFLAGS="$CFLAGS -fPIE -Wl,-pie" \
     && checkinstall -y --nodoc --install=no
+
+FROM scratch AS haproxy-ubuntu-collection
+# date +%s
+ARG cachebust='1603721524'
+ARG jemalloc_latest_tag_name='5.2.1'
+COPY --from=step4_jemalloc "/root/haproxy_static/jemalloc-${jemalloc_latest_tag_name}/jemalloc_${jemalloc_latest_tag_name}-1_amd64.deb" "/root/haproxy_static/haproxy-${haproxy_branch}/jemalloc_${jemalloc_latest_tag_name}-1_amd64.deb"
+COPY --from=haproxy_builder "/root/haproxy_static/haproxy-${haproxy_branch}/haproxy_${haproxy_latest_tag_name}-1_amd64.deb" "/root/haproxy_static/haproxy-${haproxy_branch}/haproxy_${haproxy_latest_tag_name}-1_amd64.deb"

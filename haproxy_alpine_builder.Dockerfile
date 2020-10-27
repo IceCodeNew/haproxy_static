@@ -73,3 +73,9 @@ RUN source '/root/.bashrc' \
     CFLAGS="$CFLAGS -fPIE -Wl,-pie" LDFLAGS="$LDFLAGS -static-pie -nolibc -Wl,-Bstatic -L /usr/lib -l:libc.a" \
     && cp haproxy haproxy.ori \
     && strip haproxy
+
+FROM scratch AS haproxy-alpine-collection
+# date +%s
+ARG cachebust='1603721524'
+COPY --from=haproxy_builder "/root/haproxy_static/haproxy-${haproxy_branch}/haproxy" "/root/haproxy_static/haproxy-${haproxy_branch}/haproxy"
+COPY --from=haproxy_builder "/root/haproxy_static/haproxy-${haproxy_branch}/haproxy.ori" "/root/haproxy_static/haproxy-${haproxy_branch}/haproxy.ori"
