@@ -110,7 +110,7 @@ SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 ARG haproxy_branch=2.2
 ## curl -sSL "https://git.haproxy.org/?p=haproxy-${haproxy_branch}.git;a=commit;h=refs/heads/master" | tr -d '\r\n\t' | grep -Po '(?<=<td>commit<\/td><td class="sha1">)[a-zA-Z0-9]+(?=<\/td>)'
 ARG haproxy_latest_commit_hash=f495e5d6a597e2e1caa965e963ef16103da545db
-ARG haproxy_latest_tag_name='2.2.4'
+ARG haproxy_latest_tag_name=2.2.4
 ARG openssl_latest_tag_name=1.1.1i-dev
 ARG jemalloc_latest_tag_name=5.2.1
 COPY --from=step4_jemalloc "/root/haproxy_static/jemalloc-${jemalloc_latest_tag_name}/jemalloc_${jemalloc_latest_tag_name}-1_amd64.deb" "/root/haproxy_static/haproxy-${haproxy_branch}/jemalloc_${jemalloc_latest_tag_name}-1_amd64.deb"
