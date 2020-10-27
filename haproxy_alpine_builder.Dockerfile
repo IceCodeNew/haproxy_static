@@ -1,5 +1,20 @@
 FROM alpine:edge AS base
 SHELL ["/bin/ash", "-eo", "pipefail", "-c"]
+# https://api.github.com/repos/slimm609/checksec.sh/releases/latest
+ARG checksec_latest_tag_name='2.4.0'
+# https://api.github.com/repos/IceCodeNew/myrc/commits?per_page=1&path=.bashrc
+ARG bashrc_latest_commit_hash='dffed49d1d1472f1b22b3736a5c191d74213efaa'
+ARG pcre2_version='10.35'
+# https://api.github.com/repos/openssl/openssl/tags?per_page=100
+ARG openssl_latest_tag_name='OpenSSL_1_1_1h'
+# https://api.github.com/repos/Kitware/CMake/releases/latest
+ARG cmake_latest_tag_name='v3.18.4'
+# https://api.github.com/repos/ninja-build/ninja/releases/latest
+ARG ninja_latest_tag_name='v1.10.1'
+# https://api.github.com/repos/sabotage-linux/netbsd-curses/releases/latest
+ARG netbsd_curses_tag_name="v0.3.1"
+# https://api.github.com/repos/sabotage-linux/gettext-tiny/releases/latest
+ARG gettext_tiny_tag_name="v0.3.2"
 RUN apk update; apk --no-progress --no-cache add \
     apk-tools autoconf automake bash binutils build-base ca-certificates clang-dev clang-static cmake coreutils curl dos2unix dpkg file gettext-tiny-dev git grep libarchive-tools libedit-dev libedit-static libtool linux-headers lld musl musl-dev musl-libintl musl-utils ncurses ncurses-dev ncurses-static openssl openssl-dev openssl-libs-static pcre2 pcre2-dev pcre2-tools perl pkgconf samurai util-linux; \
     apk --no-progress --no-cache upgrade; \
@@ -10,14 +25,14 @@ RUN apk update; apk --no-progress --no-cache add \
     # update-alternatives --auto cc; \
     # update-alternatives --auto c++; \
     update-alternatives --auto ld; \
-    curl -sSL4q --retry 5 --retry-delay 10 --retry-max-time 60 -o '/usr/bin/checksec' 'https://raw.githubusercontent.com/slimm609/checksec.sh/master/checksec'; \
+    curl -sSL4q --retry 5 --retry-delay 10 --retry-max-time 60 -o '/usr/bin/checksec' "https://raw.githubusercontent.com/slimm609/checksec.sh/${checksec_latest_tag_name}/checksec"; \
     chmod +x '/usr/bin/checksec'; \
-    curl -sSL4q --retry 5 --retry-delay 10 --retry-max-time 60 -o '/root/.bashrc' 'https://raw.githubusercontent.com/IceCodeNew/myrc/main/.bashrc'; \
-    mkdir -p "/root/haproxy_static"
+    curl -sSL4q --retry 5 --retry-delay 10 --retry-max-time 60 -o '/root/.bashrc' "https://raw.githubusercontent.com/IceCodeNew/myrc/${bashrc_latest_commit_hash}/.bashrc"; \
+    mkdir -p '/root/haproxy_static'
 
 FROM base AS step1_lua54
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
-ENV lua_version="5.4.0"
+ARG lua_version="5.4.0"
 WORKDIR /root/haproxy_static
 RUN source "/root/.bashrc" \
     && curl -sSROJ "https://www.lua.org/ftp/lua-${lua_version}.tar.gz" \
@@ -29,7 +44,7 @@ RUN make CFLAGS="$CFLAGS -fPIE -Wl,-pie" all test \
 
 FROM step1_lua54 AS step2_libslz
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
-ENV libslz_version="1.2.0"
+ARG libslz_version="1.2.0"
 WORKDIR /root/haproxy_static
 RUN source "/root/.bashrc" \
     && curl -sSROJ "http://git.1wt.eu/web?p=libslz.git;a=snapshot;h=v${libslz_version};sf=tbz2" \
@@ -40,7 +55,8 @@ RUN sed -i -E 's!PREFIX     := \/usr\/local!PREFIX     := /usr!' Makefile \
 
 FROM step2_libslz AS haproxy_builder
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
-ENV haproxy_version="2.2.4"
+# https://git.haproxy.org/?p=haproxy-2.2.git;a=commit;h=refs/heads/master
+ARG haproxy_latest_commit_hash='f495e5d6a597e2e1caa965e963ef16103da545db'
 WORKDIR /root/haproxy_static
 RUN source "/root/.bashrc" \
     && curl -sSROJ "https://www.haproxy.org/download/2.2/src/haproxy-${haproxy_version}.tar.gz" \
