@@ -63,7 +63,6 @@ jobs:
           echo "haproxy_latest_tag_name=$(export haproxy_branch=2.2 && curl -sSL \
                   "https://git.haproxy.org/?p=haproxy-${haproxy_branch}.git;a=tags" | tr -d '\r\n\t' |
                   grep -Po '(?<=a=shortlog;h=refs\/tags\/v)2\.2\.4')" >> $GITHUB_ENV
-          echo "cachebust=$(date +%s)" >> $GITHUB_ENV
         shell: bash
       # Runs a set of commands using the runners shell
       - name: Bump
@@ -85,10 +84,8 @@ jobs:
           sed -i -E "s/^ARG haproxy_latest_tag_name=.+/ARG haproxy_latest_tag_name=${haproxy_latest_tag_name:?empty value}/" haproxy_alpine_builder.Dockerfile haproxy_debian_builder.Dockerfile
           sed -i -E "s/^ARG lua_version=.+/ARG lua_version=5.4.0/" haproxy_alpine_builder.Dockerfile haproxy_debian_builder.Dockerfile
           sed -i -E "s/^ARG libslz_version=.+/ARG libslz_version=1.2.0/" haproxy_alpine_builder.Dockerfile haproxy_debian_builder.Dockerfile
-          sed -i -E "s/^ARG cachebust=.+/ARG cachebust=${cachebust:?empty value}/" haproxy_alpine_builder.Dockerfile haproxy_debian_builder.Dockerfile
           git add haproxy_alpine_builder.Dockerfile haproxy_debian_builder.Dockerfile
-          git commit -m "Bump"
-          git push -u origin master
+          git commit -m "Bump" && git push -u origin master || exit 0
       - name: Force push `release` branch
         run: |
           git config --local user.name "actions"
