@@ -14,7 +14,7 @@ RUN apt-get update && apt-get -y --no-install-recommends install \
     && update-locale LANG=en_US.UTF-8 \
     && ( cd /usr || exit 1; curl -LROJ4q --retry 5 --retry-delay 10 --retry-max-time 60 "https://github.com/Kitware/CMake/releases/download/v${cmake_version}/cmake-${cmake_version}-Linux-x86_64.sh" && bash "cmake-${cmake_version}-Linux-x86_64.sh" --skip-license && rm -- "/usr/cmake-${cmake_version}-Linux-x86_64.sh" /usr/bin/cmake-gui /usr/bin/ctest /usr/bin/cpack /usr/bin/ccmake; true ) \
     && ( curl -LROJ4q --retry 5 --retry-delay 10 --retry-max-time 60 "$(curl -sSL -H "Accept: application/vnd.github.v3+json" 'https://api.github.com/repos/ninja-build/ninja/releases/latest' | grep 'browser_download_url' | grep 'ninja-linux.zip' | cut -d\" -f4)" && bsdtar -xf ninja-linux.zip && rm /usr/bin/ninja ninja-linux.zip && mv ./ninja /usr/bin/ ) \
-    && update-ca-certificates \
+    # && update-ca-certificates \
     && update-alternatives --install /usr/local/bin/ld ld /usr/lib/llvm-9/bin/lld 100 \
     && update-alternatives --auto ld \
     && for i in {1..2}; do checksec --update; done; \
