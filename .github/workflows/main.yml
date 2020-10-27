@@ -38,9 +38,9 @@ jobs:
           echo "bashrc_latest_commit_hash=$(curl -sL -H 'Accept: application/vnd.github.v3+json' \
                   'https://api.github.com/repos/IceCodeNew/myrc/commits?per_page=1&path=.bashrc' |
                   grep -Fm1 'sha' | cut -d'"' -f4)" >> $GITHUB_ENV
-          echo "openssl_latest_tag_name=$(curl -sSL -H 'Accept: application/vnd.github.v3+json' \
-                  "https://api.github.com/repos/openssl/openssl/tags?per_page=100" |
-                  grep -F 'name' | cut -d'"' -f4 | grep -Em1 '^OpenSSL_1_[0-9]_[0-9][a-zA-Z]')" >> $GITHUB_ENV
+          echo "openssl_latest_tag_name=$(curl -sSL \
+                  'https://raw.githubusercontent.com/openssl/openssl/OpenSSL_1_1_1-stable/README' |
+                  grep -Eo '1.1.1.*')" >> $GITHUB_ENV
           echo "cmake_latest_tag_name=$(curl -sSL -H 'Accept: application/vnd.github.v3+json' \
                   'https://api.github.com/repos/Kitware/CMake/releases/latest' |
                   grep -F 'tag_name' | cut -d'"' -f4)" >> $GITHUB_ENV

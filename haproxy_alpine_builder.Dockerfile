@@ -5,8 +5,8 @@ ARG checksec_latest_tag_name='2.4.0'
 # https://api.github.com/repos/IceCodeNew/myrc/commits?per_page=1&path=.bashrc
 ARG bashrc_latest_commit_hash='dffed49d1d1472f1b22b3736a5c191d74213efaa'
 ARG pcre2_version='10.35'
-# https://api.github.com/repos/openssl/openssl/tags?per_page=100
-ARG openssl_latest_tag_name='OpenSSL_1_1_1h'
+## curl 'https://raw.githubusercontent.com/openssl/openssl/OpenSSL_1_1_1-stable/README' | grep -Eo '1.1.1.*'
+ARG openssl_latest_tag_name='1.1.1i-dev'
 # https://api.github.com/repos/Kitware/CMake/releases/latest
 ARG cmake_latest_tag_name='v3.18.4'
 # https://api.github.com/repos/ninja-build/ninja/releases/latest

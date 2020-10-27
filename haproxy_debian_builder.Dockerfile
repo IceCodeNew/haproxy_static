@@ -93,12 +93,13 @@ RUN ./configure --prefix=/usr \
 
 FROM step4_jemalloc AS step5_openssl
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
-# https://api.github.com/repos/openssl/openssl/tags?per_page=100
-ARG openssl_latest_tag_name='OpenSSL_1_1_1h'
+## curl 'https://raw.githubusercontent.com/openssl/openssl/OpenSSL_1_1_1-stable/README' | grep -Eo '1.1.1.*'
+ARG openssl_latest_tag_name='1.1.1i-dev'
 WORKDIR /root/haproxy_static
 RUN source '/root/.bashrc' \
-    && curl -sSROJ "https://github.com/openssl/openssl/archive/${openssl_latest_tag_name}.tar.gz" \
-    && bsdtar -xf "openssl-${openssl_latest_tag_name}.tar.gz" && rm "openssl-${openssl_latest_tag_name}.tar.gz"
+    && curl -sSROJ "https://github.com/openssl/openssl/archive/OpenSSL_1_1_1-stable.zip" \
+    && mkdir "openssl-${openssl_latest_tag_name}" \
+    && bsdtar -xf "openssl-OpenSSL_1_1_1-stable.zip" --strip-components 1 -C "openssl-${openssl_latest_tag_name}" && rm "openssl-OpenSSL_1_1_1-stable.zip"
 WORKDIR "/root/haproxy_static/openssl-${openssl_latest_tag_name}"
 RUN ./config --prefix="$(pwd -P)/.openssl" --release no-deprecated no-shared no-dtls1-method no-tls1_1-method no-sm2 no-sm3 no-sm4 no-rc2 no-rc4 threads CFLAGS="$CFLAGS -fPIC" CXXFLAGS="$CXXFLAGS -fPIC" LDFLAGS='-fuse-ld=lld' \
     && make -j "$(nproc)" CFLAGS="$CFLAGS -fPIE -Wl,-pie" CXXFLAGS="$CXXFLAGS -fPIE -Wl,-pie" \
@@ -109,7 +110,7 @@ SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 ARG haproxy_branch='2.2'
 ## curl -sSL "https://git.haproxy.org/?p=haproxy-${haproxy_branch}.git;a=commit;h=refs/heads/master" | tr -d '\r\n\t' | grep -Po '(?<=<td>commit<\/td><td class="sha1">)[a-zA-Z0-9]+(?=<\/td>)'
 ARG haproxy_latest_commit_hash='f495e5d6a597e2e1caa965e963ef16103da545db'
-ARG openssl_latest_tag_name='OpenSSL_1_1_1h'
+ARG openssl_latest_tag_name='1.1.1i-dev'
 WORKDIR /root/haproxy_static
 RUN source '/root/.bashrc' \
     && curl -sSR -o "haproxy-${haproxy_branch}.tar.gz" "https://git.haproxy.org/?p=haproxy-${haproxy_branch}.git;a=snapshot;h=${haproxy_latest_commit_hash};sf=tgz" \
