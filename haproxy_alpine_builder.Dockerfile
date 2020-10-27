@@ -74,10 +74,17 @@ RUN source '/root/.bashrc' \
     && cp haproxy haproxy.ori \
     && strip haproxy
 
-FROM scratch AS haproxy-alpine-collection
+FROM alpine:edge AS haproxy-alpine-collection
+SHELL ["/bin/ash", "-eo", "pipefail", "-c"]
 # date +%s
 ARG cachebust='1603721524'
 ARG haproxy_branch='2.2'
 ARG haproxy_latest_tag_name='2.2.4'
-COPY --from=haproxy_builder "/root/haproxy_static/haproxy-${haproxy_branch}/haproxy" "/root/haproxy_static/haproxy-${haproxy_branch}/haproxy"
-COPY --from=haproxy_builder "/root/haproxy_static/haproxy-${haproxy_branch}/haproxy.ori" "/root/haproxy_static/haproxy-${haproxy_branch}/haproxy.ori"
+COPY --from=haproxy_builder \
+"/root/haproxy_static/haproxy-${haproxy_branch}/haproxy" \
+"/root/haproxy_static/haproxy-${haproxy_branch}/haproxy.ori" \
+"/root/haproxy_static/haproxy-${haproxy_branch}/"
+RUN apk update; apk --no-progress --no-cache add \
+    bash coreutils curl findutils; \
+    apk --no-progress --no-cache upgrade; \
+    rm -rf /var/cache/apk/*

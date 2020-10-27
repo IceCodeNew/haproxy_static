@@ -130,7 +130,8 @@ RUN source '/root/.bashrc' \
     CFLAGS="$CFLAGS -fPIE -Wl,-pie" \
     && checkinstall -y --nodoc --pkgversion="$haproxy_latest_tag_name" --install=no
 
-FROM scratch AS haproxy-ubuntu-collection
+FROM alpine:edge AS haproxy-alpine-collection
+SHELL ["/bin/ash", "-eo", "pipefail", "-c"]
 # date +%s
 ARG cachebust='1603721524'
 ARG haproxy_branch='2.2'
@@ -138,3 +139,7 @@ ARG haproxy_latest_tag_name='2.2.4'
 ARG jemalloc_latest_tag_name='5.2.1'
 COPY --from=step4_jemalloc "/root/haproxy_static/jemalloc-${jemalloc_latest_tag_name}/jemalloc_${jemalloc_latest_tag_name}-1_amd64.deb" "/root/haproxy_static/haproxy-${haproxy_branch}/jemalloc_${jemalloc_latest_tag_name}-1_amd64.deb"
 COPY --from=haproxy_builder "/root/haproxy_static/haproxy-${haproxy_branch}/haproxy_${haproxy_latest_tag_name}-1_amd64.deb" "/root/haproxy_static/haproxy-${haproxy_branch}/haproxy_${haproxy_latest_tag_name}-1_amd64.deb"
+RUN apk update; apk --no-progress --no-cache add \
+    bash coreutils curl findutils; \
+    apk --no-progress --no-cache upgrade; \
+    rm -rf /var/cache/apk/*
