@@ -77,5 +77,7 @@ RUN source '/root/.bashrc' \
 FROM scratch AS haproxy-alpine-collection
 # date +%s
 ARG cachebust='1603721524'
+ARG haproxy_branch='2.2'
+ARG haproxy_latest_tag_name='2.2.4'
 COPY --from=haproxy_builder "/root/haproxy_static/haproxy-${haproxy_branch}/haproxy" "/root/haproxy_static/haproxy-${haproxy_branch}/haproxy"
 COPY --from=haproxy_builder "/root/haproxy_static/haproxy-${haproxy_branch}/haproxy.ori" "/root/haproxy_static/haproxy-${haproxy_branch}/haproxy.ori"

@@ -117,7 +117,7 @@ ARG openssl_latest_tag_name=1.1.1i-dev
 WORKDIR /root/haproxy_static
 RUN source '/root/.bashrc' \
     && curl -sSR -o "haproxy-${haproxy_branch}.tar.gz" "https://git.haproxy.org/?p=haproxy-${haproxy_branch}.git;a=snapshot;h=${haproxy_latest_commit_hash};sf=tgz" \
-    # && mkdir "haproxy-${haproxy_branch}" \
+    && mkdir "haproxy-${haproxy_branch}" \
     && bsdtar -xf "haproxy-${haproxy_branch}.tar.gz" --strip-components 1 -C "haproxy-${haproxy_branch}" && rm "haproxy-${haproxy_branch}.tar.gz" \
     && cd "haproxy-${haproxy_branch}" || exit 1 \
     && make clean \
@@ -128,11 +128,13 @@ RUN source '/root/.bashrc' \
     USE_OPENSSL=1 SSL_INC="/root/haproxy_static/openssl-${openssl_latest_tag_name}/.openssl/include" SSL_LIB="/root/haproxy_static/openssl-${openssl_latest_tag_name}/.openssl/lib" \
     USE_SLZ=1 SLZ_INC="/root/haproxy_static/libslz/src" SLZ_LIB="/root/haproxy_static/libslz" \
     CFLAGS="$CFLAGS -fPIE -Wl,-pie" \
-    && checkinstall -y --nodoc --install=no
+    && checkinstall -y --nodoc --pkgversion="$haproxy_latest_tag_name" --install=no
 
 FROM scratch AS haproxy-ubuntu-collection
 # date +%s
 ARG cachebust='1603721524'
+ARG haproxy_branch='2.2'
+ARG haproxy_latest_tag_name='2.2.4'
 ARG jemalloc_latest_tag_name='5.2.1'
 COPY --from=step4_jemalloc "/root/haproxy_static/jemalloc-${jemalloc_latest_tag_name}/jemalloc_${jemalloc_latest_tag_name}-1_amd64.deb" "/root/haproxy_static/haproxy-${haproxy_branch}/jemalloc_${jemalloc_latest_tag_name}-1_amd64.deb"
 COPY --from=haproxy_builder "/root/haproxy_static/haproxy-${haproxy_branch}/haproxy_${haproxy_latest_tag_name}-1_amd64.deb" "/root/haproxy_static/haproxy-${haproxy_branch}/haproxy_${haproxy_latest_tag_name}-1_amd64.deb"
