@@ -1,13 +1,14 @@
 FROM alpine:edge AS base
 SHELL ["/bin/ash", "-eo", "pipefail", "-c"]
-RUN apk update; apk --no-cache add \
-    apk-tools autoconf automake bash bash-completion binutils build-base ca-certificates clang-dev clang-static cmake coreutils curl dos2unix dpkg gettext-tiny-dev git grep libarchive-tools libedit-dev libedit-static libtool linux-headers lld musl-dev musl-libintl musl-utils ncurses ncurses-dev ncurses-static openssl openssl-dev openssl-libs-static pcre2 pcre2-dev pcre2-tools perl pkgconf samurai util-linux; \
-    apk --no-cache upgrade; \
-    update-alternatives --install /usr/local/bin/cc cc /usr/bin/clang 100; \
-    update-alternatives --install /usr/local/bin/c++ c++ /usr/bin/clang++ 100; \
+RUN apk update; apk --no-progress --no-cache add \
+    apk-tools autoconf automake bash binutils build-base ca-certificates clang-dev clang-static cmake coreutils curl dos2unix dpkg file gettext-tiny-dev git grep libarchive-tools libedit-dev libedit-static libtool linux-headers lld musl musl-dev musl-libintl musl-utils ncurses ncurses-dev ncurses-static openssl openssl-dev openssl-libs-static pcre2 pcre2-dev pcre2-tools perl pkgconf samurai util-linux; \
+    apk --no-progress --no-cache upgrade; \
+    rm -rf /var/cache/apk/*; \
+    # update-alternatives --install /usr/local/bin/cc cc /usr/bin/clang 100; \
+    # update-alternatives --install /usr/local/bin/c++ c++ /usr/bin/clang++ 100; \
     update-alternatives --install /usr/local/bin/ld ld /usr/bin/lld 100; \
-    update-alternatives --auto cc; \
-    update-alternatives --auto c++; \
+    # update-alternatives --auto cc; \
+    # update-alternatives --auto c++; \
     update-alternatives --auto ld; \
     curl -sSL4q --retry 5 --retry-delay 10 --retry-max-time 60 -o '/usr/bin/checksec' 'https://raw.githubusercontent.com/slimm609/checksec.sh/master/checksec'; \
     chmod +x '/usr/bin/checksec'; \
@@ -51,6 +52,19 @@ RUN source "/root/.bashrc" \
     USE_PCRE2_JIT=1 USE_STATIC_PCRE2=1 \
     USE_OPENSSL=1 SSL_INC="/usr/include/openssl" SSL_LIB="/usr/lib" \
     USE_SLZ=1 SLZ_INC="/root/haproxy_static/libslz/src" SLZ_LIB="/root/haproxy_static/libslz" \
-    CC=clang CFLAGS="$CFLAGS -fPIE -Wl,-pie" LDFLAGS="$LDFLAGS -static-pie -nolibc -Wl,-Bstatic -L /usr/lib -l:libc.a" \
+    CFLAGS="$CFLAGS -fPIE -Wl,-pie" LDFLAGS="$LDFLAGS -static-pie -nolibc -Wl,-Bstatic -L /usr/lib -l:libc.a" \
     && cp haproxy haproxy.ori \
     && strip haproxy
+# RUN source "/root/.bashrc" \
+#     && curl -sSROJ "https://www.haproxy.org/download/2.2/src/haproxy-${haproxy_version}.tar.gz" \
+#     && bsdtar -xf "haproxy-${haproxy_version}.tar.gz" && rm "haproxy-${haproxy_version}.tar.gz" \
+#     && cd "haproxy-${haproxy_version}" || exit 1 \
+#     && make clean \
+#     && make -j "$(nproc)" TARGET=linux-musl EXTRA_OBJS="contrib/prometheus-exporter/service-prometheus.o" \
+#     USE_LUA=1 LUA_INC=/usr/local/include LUA_LIB=/usr/local/lib LUA_LIB_NAME=lua \
+#     USE_PCRE2_JIT=1 USE_STATIC_PCRE2=1 \
+#     USE_OPENSSL=1 SSL_INC="/usr/include/openssl" SSL_LIB="/usr/lib" \
+#     USE_SLZ=1 SLZ_INC="/root/haproxy_static/libslz/src" SLZ_LIB="/root/haproxy_static/libslz" \
+#     CC=clang CFLAGS="$CFLAGS -fPIE -Wl,-pie" LDFLAGS="$LDFLAGS -static-pie -nolibc -Wl,-Bstatic -L /usr/lib -l:libc.a" \
+#     && cp haproxy haproxy.ori \
+#     && strip haproxy
