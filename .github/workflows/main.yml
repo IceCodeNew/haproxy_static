@@ -80,9 +80,9 @@ jobs:
           sed -i -E "s/^ARG netbsd_curses_tag_name=.+/ARG netbsd_curses_tag_name=${netbsd_curses_tag_name:?empty value}/" haproxy_alpine_builder.Dockerfile haproxy_debian_builder.Dockerfile
           sed -i -E "s/^ARG gettext_tiny_tag_name=.+/ARG gettext_tiny_tag_name=${gettext_tiny_tag_name:?empty value}/" haproxy_alpine_builder.Dockerfile haproxy_debian_builder.Dockerfile
           sed -i -E "s/^ARG jemalloc_latest_tag_name=.+/ARG jemalloc_latest_tag_name=${jemalloc_latest_tag_name:?empty value}/" haproxy_alpine_builder.Dockerfile haproxy_debian_builder.Dockerfile
-          sed -i -E "s/^ARG haproxy_branch=.+/ARG haproxy_branch=${haproxy_branch:?empty value}/" haproxy_alpine_builder.Dockerfile haproxy_debian_builder.Dockerfile
-          sed -i -E "s/^ARG haproxy_latest_commit_hash=.+/ARG haproxy_latest_commit_hash=${haproxy_latest_commit_hash:?empty value}/" haproxy_alpine_builder.Dockerfile haproxy_debian_builder.Dockerfile
-          sed -i -E "s/^ARG haproxy_latest_tag_name=.+/ARG haproxy_latest_tag_name=${haproxy_latest_tag_name:?empty value}/" haproxy_alpine_builder.Dockerfile haproxy_debian_builder.Dockerfile
+          sed -i -E "s/^ARG haproxy_branch=.+/ARG haproxy_branch=${haproxy_branch:?empty value}/" haproxy_alpine_builder.Dockerfile haproxy_debian_builder.Dockerfile release_haproxy_alpine.Dockerfile release_haproxy_debian.Dockerfile
+          sed -i -E "s/^ARG haproxy_latest_commit_hash=.+/ARG haproxy_latest_commit_hash=${haproxy_latest_commit_hash:?empty value}/" haproxy_alpine_builder.Dockerfile haproxy_debian_builder.Dockerfile release_haproxy_alpine.Dockerfile release_haproxy_debian.Dockerfile
+          sed -i -E "s/^ARG haproxy_latest_tag_name=.+/ARG haproxy_latest_tag_name=${haproxy_latest_tag_name:?empty value}/" haproxy_alpine_builder.Dockerfile haproxy_debian_builder.Dockerfile release_haproxy_alpine.Dockerfile release_haproxy_debian.Dockerfile
           sed -i -E "s/^ARG lua_version=.+/ARG lua_version=5.4.0/" haproxy_alpine_builder.Dockerfile haproxy_debian_builder.Dockerfile
           sed -i -E "s/^ARG libslz_version=.+/ARG libslz_version=1.2.0/" haproxy_alpine_builder.Dockerfile haproxy_debian_builder.Dockerfile
           git add haproxy_alpine_builder.Dockerfile haproxy_debian_builder.Dockerfile
