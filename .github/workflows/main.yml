@@ -85,7 +85,7 @@ jobs:
           sed -i -E "s/^ARG haproxy_latest_tag_name=.+/ARG haproxy_latest_tag_name=${haproxy_latest_tag_name:?empty value}/" haproxy_alpine_builder.Dockerfile haproxy_debian_builder.Dockerfile release_haproxy_alpine.Dockerfile release_haproxy_debian.Dockerfile
           sed -i -E "s/^ARG lua_version=.+/ARG lua_version=5.4.0/" haproxy_alpine_builder.Dockerfile haproxy_debian_builder.Dockerfile
           sed -i -E "s/^ARG libslz_version=.+/ARG libslz_version=1.2.0/" haproxy_alpine_builder.Dockerfile haproxy_debian_builder.Dockerfile
-          git add haproxy_alpine_builder.Dockerfile haproxy_debian_builder.Dockerfile
+          git add haproxy_alpine_builder.Dockerfile haproxy_debian_builder.Dockerfile release_haproxy_alpine.Dockerfile release_haproxy_debian.Dockerfile
           git commit -m "Bump" && git push -u origin master || exit 0
       - name: Force push `release` branch
         run: |
