@@ -107,13 +107,14 @@ RUN ./config --prefix="$(pwd -P)/.openssl" --release no-deprecated no-shared no-
 FROM step5_openssl AS haproxy_builder
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 ARG haproxy_branch='2.2'
-## curl -sSL "https://git.haproxy.org/?p=haproxy-${haproxy_branch}.git;a=tags" | tr -d '\r\n\t' | grep -Po '(?<=a=shortlog;h=refs\/tags\/v)2\.2\.4'
-ARG haproxy_latest_tag_name='2.2.4'
+## curl -sSL "https://git.haproxy.org/?p=haproxy-${haproxy_branch}.git;a=commit;h=refs/heads/master" | tr -d '\r\n\t' | grep -Po '(?<=<td>commit<\/td><td class="sha1">)[a-zA-Z0-9]+(?=<\/td>)'
+ARG haproxy_latest_commit_hash='f495e5d6a597e2e1caa965e963ef16103da545db'
 WORKDIR /root/haproxy_static
 RUN source "/root/.bashrc" \
-    && curl -sSROJ "https://www.haproxy.org/download/${haproxy_branch}/src/haproxy-${haproxy_latest_tag_name}.tar.gz" \
-    && bsdtar -xf "haproxy-${haproxy_latest_tag_name}.tar.gz" && rm "haproxy-${haproxy_latest_tag_name}.tar.gz" \
-    && cd "haproxy-${haproxy_latest_tag_name}" || exit 1 \
+    && curl -sSR -o "haproxy-${haproxy_branch}.tar.gz" "https://git.haproxy.org/?p=haproxy-${haproxy_branch}.git;a=snapshot;h=${haproxy_latest_commit_hash};sf=tgz" \
+    && mkdir "haproxy-${haproxy_branch}" \
+    && bsdtar -xf "haproxy-${haproxy_branch}.tar.gz" --strip-components 1 -C "haproxy-${haproxy_branch}" && rm "haproxy-${haproxy_branch}.tar.gz" \
+    && cd "haproxy-${haproxy_branch}" || exit 1 \
     && make clean \
     && make -j "$(nproc)" TARGET=linux-glibc EXTRA_OBJS="contrib/prometheus-exporter/service-prometheus.o" \
     ADDLIB="-ljemalloc $(jemalloc-config --libs)" \
