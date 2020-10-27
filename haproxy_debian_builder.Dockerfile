@@ -93,6 +93,8 @@ RUN ./configure --prefix=/usr \
 
 FROM step4_jemalloc AS step5_openssl
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
+# https://api.github.com/repos/openssl/openssl/commits?per_page=1&sha=OpenSSL_1_1_1-stable
+ARG openssl_latest_commit_hash='8979ffee95043baffa51887b1d43d9b07f9fae1b'
 ## curl 'https://raw.githubusercontent.com/openssl/openssl/OpenSSL_1_1_1-stable/README' | grep -Eo '1.1.1.*'
 ARG openssl_latest_tag_name=1.1.1i-dev
 WORKDIR /root/haproxy_static

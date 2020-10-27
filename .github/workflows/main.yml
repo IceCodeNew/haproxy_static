@@ -41,6 +41,9 @@ jobs:
           echo "openssl_latest_tag_name=$(curl -sSL \
                   'https://raw.githubusercontent.com/openssl/openssl/OpenSSL_1_1_1-stable/README' |
                   grep -Eo '1.1.1.*')" >> $GITHUB_ENV
+          echo "openssl_latest_commit_hash=$(curl -sSL -H 'Accept: application/vnd.github.v3+json' \
+                  'https://api.github.com/repos/openssl/openssl/commits?per_page=1&sha=OpenSSL_1_1_1-stable' |
+                  grep -Fm1 'sha' | cut -d'"' -f4)" >> $GITHUB_ENV
           echo "cmake_latest_tag_name=$(curl -sSL -H 'Accept: application/vnd.github.v3+json' \
                   'https://api.github.com/repos/Kitware/CMake/releases/latest' |
                   grep -F 'tag_name' | cut -d'"' -f4)" >> $GITHUB_ENV
@@ -75,6 +78,7 @@ jobs:
           sed -i -E "s/^ARG bashrc_latest_commit_hash=.+/ARG bashrc_latest_commit_hash=${bashrc_latest_commit_hash:?empty value}/" haproxy_alpine_builder.Dockerfile haproxy_debian_builder.Dockerfile
           sed -i -E "s/^ARG pcre2_version=.+/ARG pcre2_version=10.35/" haproxy_alpine_builder.Dockerfile haproxy_debian_builder.Dockerfile
           sed -i -E "s/^ARG openssl_latest_tag_name=.+/ARG openssl_latest_tag_name=${openssl_latest_tag_name:?empty value}/" haproxy_alpine_builder.Dockerfile haproxy_debian_builder.Dockerfile
+          sed -i -E "s/^ARG openssl_latest_commit_hash=.+/ARG openssl_latest_commit_hash=${openssl_latest_commit_hash:?empty value}/" haproxy_alpine_builder.Dockerfile haproxy_debian_builder.Dockerfile
           sed -i -E "s/^ARG cmake_latest_tag_name=.+/ARG cmake_latest_tag_name=${cmake_latest_tag_name:?empty value}/" haproxy_alpine_builder.Dockerfile haproxy_debian_builder.Dockerfile
           sed -i -E "s/^ARG ninja_latest_tag_name=.+/ARG ninja_latest_tag_name=${ninja_latest_tag_name:?empty value}/" haproxy_alpine_builder.Dockerfile haproxy_debian_builder.Dockerfile
           sed -i -E "s/^ARG netbsd_curses_tag_name=.+/ARG netbsd_curses_tag_name=${netbsd_curses_tag_name:?empty value}/" haproxy_alpine_builder.Dockerfile haproxy_debian_builder.Dockerfile
