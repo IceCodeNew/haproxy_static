@@ -1,4 +1,4 @@
-FROM ubuntu:devel AS base
+FROM ubuntu:latest AS base
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 ARG DEBIAN_FRONTEND=noninteractive
 # https://api.github.com/repos/slimm609/checksec.sh/releases/latest
