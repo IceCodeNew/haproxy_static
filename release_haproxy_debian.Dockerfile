@@ -12,8 +12,8 @@ RUN --mount=type=secret,id=GIT_AUTH_TOKEN,dst=/tmp/secret_token export GITHUB_TO
     # && github-release delete \
     # --user IceCodeNew \
     # --repo haproxy_static \
-    # --tag "v${haproxy_latest_tag_name}" \
-    # && github-release release \
+    # --tag "v${haproxy_latest_tag_name}"; \
+    # github-release release \
     # --user IceCodeNew \
     # --repo haproxy_static \
     # --tag "v${haproxy_latest_tag_name}" \
