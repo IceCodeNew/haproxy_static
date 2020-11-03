@@ -77,7 +77,7 @@ RUN source '/root/.bashrc' \
 FROM alpine:edge AS haproxy-alpine-collection
 SHELL ["/bin/ash", "-eo", "pipefail", "-c"]
 # date +%s
-ARG cachebust=1604339462
+ARG cachebust=1604368263
 ARG haproxy_branch=2.2
 ARG haproxy_latest_tag_name=2.2.4
 COPY --from=haproxy_builder \
