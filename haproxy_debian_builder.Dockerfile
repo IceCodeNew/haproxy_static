@@ -111,7 +111,7 @@ FROM step5_openssl AS haproxy_builder
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 ARG haproxy_branch=2.2
 ## curl -sSL "https://git.haproxy.org/?p=haproxy-${haproxy_branch}.git;a=commit;h=refs/heads/master" | tr -d '\r\n\t' | grep -Po '(?<=<td>commit<\/td><td class="sha1">)[a-zA-Z0-9]+(?=<\/td>)'
-ARG haproxy_latest_commit_hash=f290b74c69739560c4d49577fec3b5f9de73240e
+ARG haproxy_latest_commit_hash=aa3c7001cb32cd9c5bb7b5258459bb971e956438
 ARG haproxy_latest_tag_name=2.2.4
 ARG openssl_latest_tag_name=1.1.1i-dev
 WORKDIR /root/haproxy_static
@@ -133,7 +133,7 @@ RUN source '/root/.bashrc' \
 FROM alpine:edge AS haproxy-alpine-collection
 SHELL ["/bin/ash", "-eo", "pipefail", "-c"]
 # date +%s
-ARG cachebust=1604483459
+ARG cachebust=1604512266
 ARG haproxy_branch=2.2
 ARG haproxy_latest_tag_name=2.2.4
 ARG jemalloc_latest_tag_name=5.2.1
