@@ -32,11 +32,11 @@ RUN apk update; apk --no-progress --no-cache add \
 
 FROM base AS step1_lua54
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
+## curl -sSL "https://www.lua.org/download.html" | tr -d '\r\n\t' | grep -Po '(?<=lua-)[0-9]\.[0-9]\.[0-9](?=\.tar\.gz)' | sort -ru | head -n 1
 ARG lua_version=5.4.0
 WORKDIR /root/haproxy_static
 RUN source '/root/.bashrc' \
     && curl -sSROJ "https://www.lua.org/ftp/lua-${lua_version}.tar.gz" \
-    && sha1sum "lua-${lua_version}.tar.gz" | grep '8cdbffa8a214a23d190d7c45f38c19518ae62e89' \
     && bsdtar -xf "lua-${lua_version}.tar.gz" && rm "lua-${lua_version}.tar.gz"
 WORKDIR "/root/haproxy_static/lua-${lua_version}"
 RUN make CFLAGS="$CFLAGS -fPIE -Wl,-pie" all test \
