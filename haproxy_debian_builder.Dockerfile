@@ -67,11 +67,12 @@ RUN make CFLAGS="$CFLAGS -fPIE -Wl,-pie" all test \
 
 FROM step2_lua54 AS step3_libslz
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
-ARG libslz_version=1.2.0
+## curl -sSL "http://git.1wt.eu/web?p=libslz.git;a=commit;h=refs/heads/master" | tr -d '\r\n\t' | grep -Po '(?<=<td>commit<\/td><td class="sha1">)[a-zA-Z0-9]+(?=<\/td>)'
+ARG libslz_latest_commit_hash='ff537154e7f5f2fffdbef1cd8c52b564c1b00067'
 WORKDIR /root/haproxy_static
 RUN source '/root/.bashrc' \
-    && curl -sSROJ "http://git.1wt.eu/web?p=libslz.git;a=snapshot;h=v${libslz_version};sf=tbz2" \
-    && bsdtar -xf "libslz-v${libslz_version}.tar.bz2" && rm "libslz-v${libslz_version}.tar.bz2"
+    && curl -sSROJ "http://git.1wt.eu/web?p=libslz.git;a=snapshot;h=${libslz_latest_commit_hash};sf=tbz2" \
+    && bsdtar -xf "libslz-${libslz_latest_commit_hash}.tar.bz2" && rm "libslz-${libslz_latest_commit_hash}.tar.bz2"
 WORKDIR /root/haproxy_static/libslz
 RUN sed -i -E 's!PREFIX     := \/usr\/local!PREFIX     := /usr!' Makefile \
     && make CFLAGS="$CFLAGS -fPIE -Wl,-pie" static
