@@ -6,7 +6,7 @@ ARG checksec_latest_tag_name=2.4.0
 ARG bashrc_latest_commit_hash=dffed49d1d1472f1b22b3736a5c191d74213efaa
 ## curl -sSL "https://ftp.pcre.org/pub/pcre/" | tr -d '\r\n\t' | grep -Po '(?<=pcre2-)[0-9]+\.[0-9]+(?=\.tar\.bz2)' | sort -ru | head -n 1
 ARG pcre2_version=10.35
-## curl 'https://raw.githubusercontent.com/openssl/openssl/OpenSSL_1_1_1-stable/README' | grep -Eo '1.1.1.*'
+## curl -sSL 'https://raw.githubusercontent.com/openssl/openssl/OpenSSL_1_1_1-stable/README' | grep -Eo '1.1.1.*'
 ARG openssl_latest_tag_name=1.1.1i-dev
 # https://api.github.com/repos/Kitware/CMake/releases/latest
 ARG cmake_latest_tag_name=v3.18.4
@@ -26,9 +26,10 @@ RUN apk update; apk --no-progress --no-cache add \
     # update-alternatives --auto cc; \
     # update-alternatives --auto c++; \
     update-alternatives --auto ld; \
-    curl -sSL4q --retry 5 --retry-delay 10 --retry-max-time 60 -o '/usr/bin/checksec' "https://raw.githubusercontent.com/slimm609/checksec.sh/${checksec_latest_tag_name}/checksec"; \
+    curl -sSLR4q --retry 5 --retry-delay 10 --retry-max-time 60 -o '/root/.bashrc' "https://raw.githubusercontent.com/IceCodeNew/myrc/${bashrc_latest_commit_hash}/.bashrc"; \
+    eval "$(sed -E '/^curl\(\)/!d' .bashrc)"; \
+    curl -sS -o '/usr/bin/checksec' "https://raw.githubusercontent.com/slimm609/checksec.sh/${checksec_latest_tag_name}/checksec"; \
     chmod +x '/usr/bin/checksec'; \
-    curl -sSL4q --retry 5 --retry-delay 10 --retry-max-time 60 -o '/root/.bashrc' "https://raw.githubusercontent.com/IceCodeNew/myrc/${bashrc_latest_commit_hash}/.bashrc"; \
     mkdir -p '/root/haproxy_static'
 
 FROM base AS step1_lua54
@@ -37,7 +38,7 @@ SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 ARG lua_version=5.4.0
 WORKDIR /root/haproxy_static
 RUN source '/root/.bashrc' \
-    && curl -sSROJ "https://www.lua.org/ftp/lua-${lua_version}.tar.gz" \
+    && curl -sSOJ "https://www.lua.org/ftp/lua-${lua_version}.tar.gz" \
     && bsdtar -xf "lua-${lua_version}.tar.gz" && rm "lua-${lua_version}.tar.gz"
 WORKDIR "/root/haproxy_static/lua-${lua_version}"
 RUN make CFLAGS="$CFLAGS -fPIE -Wl,-pie" all test \
@@ -49,7 +50,7 @@ SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 ARG libslz_latest_commit_hash='ff537154e7f5f2fffdbef1cd8c52b564c1b00067'
 WORKDIR /root/haproxy_static
 RUN source '/root/.bashrc' \
-    && curl -sSROJ "http://git.1wt.eu/web?p=libslz.git;a=snapshot;h=${libslz_latest_commit_hash};sf=tbz2" \
+    && curl -sSOJ "http://git.1wt.eu/web?p=libslz.git;a=snapshot;h=${libslz_latest_commit_hash};sf=tbz2" \
     && bsdtar -xf "libslz-${libslz_latest_commit_hash}.tar.bz2" && rm "libslz-${libslz_latest_commit_hash}.tar.bz2"
 WORKDIR /root/haproxy_static/libslz
 RUN sed -i -E 's!PREFIX     := \/usr\/local!PREFIX     := /usr!' Makefile \
@@ -62,7 +63,7 @@ ARG haproxy_branch=2.2
 ARG haproxy_latest_commit_hash=aa3c7001cb32cd9c5bb7b5258459bb971e956438
 WORKDIR /root/haproxy_static
 RUN source '/root/.bashrc' \
-    && curl -sSR -o "haproxy-${haproxy_branch}.tar.gz" "https://git.haproxy.org/?p=haproxy-${haproxy_branch}.git;a=snapshot;h=${haproxy_latest_commit_hash};sf=tgz" \
+    && curl -sS -o "haproxy-${haproxy_branch}.tar.gz" "https://git.haproxy.org/?p=haproxy-${haproxy_branch}.git;a=snapshot;h=${haproxy_latest_commit_hash};sf=tgz" \
     && mkdir "haproxy-${haproxy_branch}" \
     && bsdtar -xf "haproxy-${haproxy_branch}.tar.gz" --strip-components 1 -C "haproxy-${haproxy_branch}" && rm "haproxy-${haproxy_branch}.tar.gz" \
     && cd "haproxy-${haproxy_branch}" || exit 1 \

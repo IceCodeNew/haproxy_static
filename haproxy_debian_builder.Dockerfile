@@ -25,18 +25,19 @@ RUN apt-get update && apt-get -y --no-install-recommends install \
     # && for i in {1..2}; do checksec --update; done \
     && update-alternatives --install /usr/local/bin/ld ld /usr/bin/lld 100 \
     && update-alternatives --auto ld \
-    && ( cd /usr || exit 1; curl -LROJ4q --retry 5 --retry-delay 10 --retry-max-time 60 "https://github.com/Kitware/CMake/releases/download/${cmake_latest_tag_name}/cmake-${cmake_latest_tag_name#v}-Linux-x86_64.sh" && bash "cmake-${cmake_latest_tag_name#v}-Linux-x86_64.sh" --skip-license && rm -f -- "/usr/cmake-${cmake_latest_tag_name#v}-Linux-x86_64.sh" '/usr/bin/cmake-gui' '/usr/bin/ctest' '/usr/bin/cpack' '/usr/bin/ccmake'; true ) \
-    && ( curl -LROJ4q --retry 5 --retry-delay 10 --retry-max-time 60 "https://github.com/ninja-build/ninja/releases/download/${ninja_latest_tag_name}/ninja-linux.zip" && bsdtar -xf ninja-linux.zip && install -pvD "./ninja" "/usr/bin/" && rm -f -- './ninja' 'ninja-linux.zip' ) \
-    && curl -sSL4q --retry 5 --retry-delay 10 --retry-max-time 60 -o '/root/.bashrc' "https://raw.githubusercontent.com/IceCodeNew/myrc/${bashrc_latest_commit_hash}/.bashrc" \
+    && curl -sSLR4q --retry 5 --retry-delay 10 --retry-max-time 60 -o '/root/.bashrc' "https://raw.githubusercontent.com/IceCodeNew/myrc/${bashrc_latest_commit_hash}/.bashrc" \
+    && eval "$(sed -E '/^curl\(\)/!d' /root/.bashrc)" \
+    && ( cd /usr || exit 1; curl -OJ "https://github.com/Kitware/CMake/releases/download/${cmake_latest_tag_name}/cmake-${cmake_latest_tag_name#v}-Linux-x86_64.sh" && bash "cmake-${cmake_latest_tag_name#v}-Linux-x86_64.sh" --skip-license && rm -f -- "/usr/cmake-${cmake_latest_tag_name#v}-Linux-x86_64.sh" '/usr/bin/cmake-gui' '/usr/bin/ctest' '/usr/bin/cpack' '/usr/bin/ccmake'; true ) \
+    && ( curl -OJ "https://github.com/ninja-build/ninja/releases/download/${ninja_latest_tag_name}/ninja-linux.zip" && bsdtar -xf ninja-linux.zip && install -pvD "./ninja" "/usr/bin/" && rm -f -- './ninja' 'ninja-linux.zip' ) \
     && mkdir -p '/root/haproxy_static' \
     && mkdir -p '/usr/local/doc' \
     ### https://github.com/sabotage-linux/netbsd-curses
-    && curl -sSLROJ --retry 5 --retry-delay 10 --retry-max-time 60 "http://ftp.barfooze.de/pub/sabotage/tarballs/netbsd-curses-${netbsd_curses_tag_name}.tar.xz" \
+    && curl -sSOJ "http://ftp.barfooze.de/pub/sabotage/tarballs/netbsd-curses-${netbsd_curses_tag_name}.tar.xz" \
     && bsdtar -xf "netbsd-curses-${netbsd_curses_tag_name}.tar.xz" \
     && ( cd "/netbsd-curses-${netbsd_curses_tag_name}" || exit 1; make CFLAGS="$CFLAGS -fPIC" PREFIX=/usr -j "$(nproc)" all install ) \
     && rm -rf "/netbsd-curses-${netbsd_curses_tag_name}"* \
     ### https://github.com/sabotage-linux/gettext-tiny
-    && curl -sSLROJ --retry 5 --retry-delay 10 --retry-max-time 60 "http://ftp.barfooze.de/pub/sabotage/tarballs/gettext-tiny-${gettext_tiny_tag_name}.tar.xz" \
+    && curl -sSOJ "http://ftp.barfooze.de/pub/sabotage/tarballs/gettext-tiny-${gettext_tiny_tag_name}.tar.xz" \
     && bsdtar -xf "gettext-tiny-${gettext_tiny_tag_name}.tar.xz" \
     && ( cd "/gettext-tiny-${gettext_tiny_tag_name}" || exit 1; make CFLAGS="$CFLAGS -fPIC" PREFIX=/usr -j "$(nproc)" all install ) \
     && rm -rf "/gettext-tiny-${gettext_tiny_tag_name}"*
@@ -47,7 +48,7 @@ SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 ARG pcre2_version=10.35
 WORKDIR /root/haproxy_static
 RUN source '/root/.bashrc' \
-    && curl -sSROJ "https://ftp.pcre.org/pub/pcre/pcre2-${pcre2_version}.tar.bz2" \
+    && curl -sSOJ "https://ftp.pcre.org/pub/pcre/pcre2-${pcre2_version}.tar.bz2" \
     && bsdtar -xf "pcre2-${pcre2_version}.tar.bz2" && rm "pcre2-${pcre2_version}.tar.bz2"
 WORKDIR "/root/haproxy_static/pcre2-${pcre2_version}"
 RUN ./configure --enable-jit --enable-jit-sealloc \
@@ -60,7 +61,7 @@ SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 ARG lua_version=5.4.0
 WORKDIR /root/haproxy_static
 RUN source '/root/.bashrc' \
-    && curl -sSROJ "https://www.lua.org/ftp/lua-${lua_version}.tar.gz" \
+    && curl -sSOJ "https://www.lua.org/ftp/lua-${lua_version}.tar.gz" \
     && bsdtar -xf "lua-${lua_version}.tar.gz" && rm "lua-${lua_version}.tar.gz"
 WORKDIR "/root/haproxy_static/lua-${lua_version}"
 RUN make CFLAGS="$CFLAGS -fPIE -Wl,-pie" all test \
@@ -72,7 +73,7 @@ SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 ARG libslz_latest_commit_hash='ff537154e7f5f2fffdbef1cd8c52b564c1b00067'
 WORKDIR /root/haproxy_static
 RUN source '/root/.bashrc' \
-    && curl -sSROJ "http://git.1wt.eu/web?p=libslz.git;a=snapshot;h=${libslz_latest_commit_hash};sf=tbz2" \
+    && curl -sSOJ "http://git.1wt.eu/web?p=libslz.git;a=snapshot;h=${libslz_latest_commit_hash};sf=tbz2" \
     && bsdtar -xf "libslz-${libslz_latest_commit_hash}.tar.bz2" && rm "libslz-${libslz_latest_commit_hash}.tar.bz2"
 WORKDIR /root/haproxy_static/libslz
 RUN sed -i -E 's!PREFIX     := \/usr\/local!PREFIX     := /usr!' Makefile \
@@ -86,7 +87,7 @@ WORKDIR /root/haproxy_static
 RUN source '/root/.bashrc' \
     && var_icn_filename="jemalloc-${jemalloc_latest_tag_name}.tar.bz2" \
     && var_icn_download="https://github.com/jemalloc/jemalloc/releases/download/${jemalloc_latest_tag_name}/${var_icn_filename}" \
-    && curl -sSR -o "$var_icn_filename" -- "$var_icn_download" \
+    && curl -sS -o "$var_icn_filename" -- "$var_icn_download" \
     && bsdtar -xf "$var_icn_filename" && rm "$var_icn_filename"
 WORKDIR "/root/haproxy_static/jemalloc-${jemalloc_latest_tag_name}"
 RUN ./configure --prefix=/usr \
@@ -97,11 +98,11 @@ FROM step4_jemalloc AS step5_openssl
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 # https://api.github.com/repos/openssl/openssl/commits?per_page=1&sha=OpenSSL_1_1_1-stable
 ARG openssl_latest_commit_hash=25fa346e906c4f487727cfebd5a40740709e677b
-## curl 'https://raw.githubusercontent.com/openssl/openssl/OpenSSL_1_1_1-stable/README' | grep -Eo '1.1.1.*'
+## curl -sSL 'https://raw.githubusercontent.com/openssl/openssl/OpenSSL_1_1_1-stable/README' | grep -Eo '1.1.1.*'
 ARG openssl_latest_tag_name=1.1.1i-dev
 WORKDIR /root/haproxy_static
 RUN source '/root/.bashrc' \
-    && curl -sSROJ "https://github.com/openssl/openssl/archive/OpenSSL_1_1_1-stable.zip" \
+    && curl -sSOJ "https://github.com/openssl/openssl/archive/OpenSSL_1_1_1-stable.zip" \
     && mkdir "openssl-${openssl_latest_tag_name}" \
     && bsdtar -xf "openssl-OpenSSL_1_1_1-stable.zip" --strip-components 1 -C "openssl-${openssl_latest_tag_name}" && rm "openssl-OpenSSL_1_1_1-stable.zip"
 WORKDIR "/root/haproxy_static/openssl-${openssl_latest_tag_name}"
@@ -118,7 +119,7 @@ ARG haproxy_latest_tag_name=2.2.4
 ARG openssl_latest_tag_name=1.1.1i-dev
 WORKDIR /root/haproxy_static
 RUN source '/root/.bashrc' \
-    && curl -sSR -o "haproxy-${haproxy_branch}.tar.gz" "https://git.haproxy.org/?p=haproxy-${haproxy_branch}.git;a=snapshot;h=${haproxy_latest_commit_hash};sf=tgz" \
+    && curl -sS -o "haproxy-${haproxy_branch}.tar.gz" "https://git.haproxy.org/?p=haproxy-${haproxy_branch}.git;a=snapshot;h=${haproxy_latest_commit_hash};sf=tgz" \
     && mkdir "haproxy-${haproxy_branch}" \
     && bsdtar -xf "haproxy-${haproxy_branch}.tar.gz" --strip-components 1 -C "haproxy-${haproxy_branch}" && rm "haproxy-${haproxy_branch}.tar.gz" \
     && cd "haproxy-${haproxy_branch}" || exit 1 \

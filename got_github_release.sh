@@ -16,7 +16,7 @@ curl_to_dest() {
   if [[ $# -eq 2 ]]; then
     tmp_dir=$(mktemp -d)
     pushd "$tmp_dir" || exit 1
-    if $(type -P curl) -LROJq --retry 5 --retry-delay 10 --retry-max-time 60 "$1"; then
+    if curl -OJ "$1"; then
       find . -maxdepth 1 -type f -print0 | xargs -0 -i -r -s 2000 "$(type -P install)" -pvD "{}" "$2"
     fi
     popd || exit 1
