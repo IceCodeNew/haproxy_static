@@ -1,4 +1,4 @@
-FROM ubuntu:latest AS base
+FROM quay.io/icecodenew/ubuntu:latest AS base
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 ARG DEBIAN_FRONTEND=noninteractive
 # https://api.github.com/repos/slimm609/checksec.sh/releases/latest
@@ -133,7 +133,7 @@ RUN source '/root/.bashrc' \
     CFLAGS="$CFLAGS -fPIE -Wl,-pie" \
     && checkinstall -y --nodoc --pkgversion="$haproxy_latest_tag_name" --install=no
 
-FROM alpine:edge AS haproxy-alpine-collection
+FROM quay.io/icecodenew/alpine:edge AS haproxy-alpine-collection
 SHELL ["/bin/ash", "-eo", "pipefail", "-c"]
 # date +%s
 ARG cachebust=1604512266

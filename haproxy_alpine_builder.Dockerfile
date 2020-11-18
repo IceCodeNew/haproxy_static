@@ -1,4 +1,4 @@
-FROM alpine:edge AS base
+FROM quay.io/icecodenew/alpine:edge AS base
 SHELL ["/bin/ash", "-eo", "pipefail", "-c"]
 # https://api.github.com/repos/slimm609/checksec.sh/releases/latest
 ARG checksec_latest_tag_name=2.4.0
@@ -77,7 +77,7 @@ RUN source '/root/.bashrc' \
     && cp haproxy haproxy.ori \
     && strip haproxy
 
-FROM alpine:edge AS haproxy-alpine-collection
+FROM quay.io/icecodenew/alpine:edge AS haproxy-alpine-collection
 SHELL ["/bin/ash", "-eo", "pipefail", "-c"]
 # date +%s
 ARG cachebust=1604512266
