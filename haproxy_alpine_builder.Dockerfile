@@ -27,7 +27,8 @@ RUN apk update; apk --no-progress --no-cache add \
     # update-alternatives --auto c++; \
     update-alternatives --auto ld; \
     curl -sSLR4q --retry 5 --retry-delay 10 --retry-max-time 60 -o '/root/.bashrc' "https://raw.githubusercontent.com/IceCodeNew/myrc/${bashrc_latest_commit_hash}/.bashrc"; \
-    eval "$(sed -E '/^curl\(\)/!d' .bashrc)"; \
+    unset -f curl; \
+    eval 'curl() { /usr/bin/curl -LRq --retry 5 --retry-delay 10 --retry-max-time 60 "$@"; }'; \
     curl -sS -o '/usr/bin/checksec' "https://raw.githubusercontent.com/slimm609/checksec.sh/${checksec_latest_tag_name}/checksec"; \
     chmod +x '/usr/bin/checksec'; \
     mkdir -p '/root/haproxy_static'
