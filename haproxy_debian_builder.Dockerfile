@@ -13,17 +13,23 @@ ARG ninja_latest_tag_name=v1.10.1
 ARG netbsd_curses_tag_name=0.3.1
 # https://api.github.com/repos/sabotage-linux/gettext-tiny/releases/latest
 ARG gettext_tiny_tag_name=0.3.2
+ENV PATH=/usr/lib/llvm-11/bin:$PATH
 RUN apt-get update && apt-get -y --no-install-recommends install \
-    apt-utils autoconf automake binutils build-essential ca-certificates checkinstall checksec cmake coreutils curl dos2unix git libarchive-tools libedit-dev libsystemd-dev libtool-bin lld locales musl-tools ncurses-bin ninja-build pkgconf util-linux \
+    apt-utils autoconf automake binutils build-essential ca-certificates checkinstall checksec cmake coreutils curl dos2unix git gpg gpg-agent libarchive-tools libedit-dev libsystemd-dev libtool-bin locales musl-tools ncurses-bin ninja-build pkgconf util-linux \
     && apt-get -y full-upgrade \
-    && apt-get clean && apt-get -y --auto-remove -o APT::AutoRemove::RecommendsImportant=false purge \
+    && apt-get -y --auto-remove -o APT::AutoRemove::RecommendsImportant=false purge \
+    && curl -L 'https://apt.llvm.org/llvm-snapshot.gpg.key' | apt-key add - \
+    && echo 'deb http://apt.llvm.org/focal/ llvm-toolchain-focal-11 main' > /etc/apt/sources.list.d/llvm.stable.list \
+    && apt-get update && apt-get -y --install-recommends install \
+    lld-11 \
+    && apt-get clean \
     && rm -rf /var/lib/apt/lists/* \
     && sed -i '/en_US.UTF-8/s/^# //' /etc/locale.gen \
     && dpkg-reconfigure --frontend=noninteractive locales \
     && update-locale LANG=en_US.UTF-8 \
     # && update-ca-certificates \
     # && for i in {1..2}; do checksec --update; done \
-    && update-alternatives --install /usr/local/bin/ld ld /usr/bin/lld 100 \
+    && update-alternatives --install /usr/local/bin/ld ld /usr/lib/llvm-11/bin/lld 100 \
     && update-alternatives --auto ld \
     && curl -sSLR4q --retry 5 --retry-delay 10 --retry-max-time 60 -o '/root/.bashrc' "https://raw.githubusercontent.com/IceCodeNew/myrc/${bashrc_latest_commit_hash}/.bashrc" \
     && eval "$(sed -E '/^curl\(\)/!d' /root/.bashrc)" \
