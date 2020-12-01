@@ -38,15 +38,13 @@ RUN apt-get update && apt-get -y --no-install-recommends install \
     && mkdir -p '/root/haproxy_static' \
     && mkdir -p '/usr/local/doc' \
     ### https://github.com/sabotage-linux/netbsd-curses
-    && curl -sSOJ --compressed "http://ftp.barfooze.de/pub/sabotage/tarballs/netbsd-curses-${netbsd_curses_tag_name}.tar.xz" \
-    && bsdtar -xf "netbsd-curses-${netbsd_curses_tag_name}.tar.xz" \
+    && curl --compressed "http://ftp.barfooze.de/pub/sabotage/tarballs/netbsd-curses-${netbsd_curses_tag_name}.tar.xz" | bsdtar -xf- \
     && ( cd "/netbsd-curses-${netbsd_curses_tag_name}" || exit 1; make CFLAGS="$CFLAGS -fPIC" PREFIX=/usr -j "$(nproc)" all install ) \
-    && rm -rf "/netbsd-curses-${netbsd_curses_tag_name}"* \
+    && rm -rf "/netbsd-curses-${netbsd_curses_tag_name}" \
     ### https://github.com/sabotage-linux/gettext-tiny
-    && curl -sSOJ --compressed "http://ftp.barfooze.de/pub/sabotage/tarballs/gettext-tiny-${gettext_tiny_tag_name}.tar.xz" \
-    && bsdtar -xf "gettext-tiny-${gettext_tiny_tag_name}.tar.xz" \
+    && curl --compressed "http://ftp.barfooze.de/pub/sabotage/tarballs/gettext-tiny-${gettext_tiny_tag_name}.tar.xz" | bsdtar -xf- \
     && ( cd "/gettext-tiny-${gettext_tiny_tag_name}" || exit 1; make CFLAGS="$CFLAGS -fPIC" PREFIX=/usr -j "$(nproc)" all install ) \
-    && rm -rf "/gettext-tiny-${gettext_tiny_tag_name}"*
+    && rm -rf "/gettext-tiny-${gettext_tiny_tag_name}"
 
 FROM base AS step1_pcre2
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
