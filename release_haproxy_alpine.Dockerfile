@@ -1,4 +1,4 @@
-# syntax = docker/dockerfile:1.0-experimental
+# syntax=docker.io/docker/dockerfile-upstream:1.2.0
 FROM quay.io/icecodenew/haproxy_static:alpine AS haproxy_uploader
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 ARG haproxy_branch=2.2
