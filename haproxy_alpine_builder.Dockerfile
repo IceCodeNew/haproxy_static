@@ -4,8 +4,7 @@ SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 ARG lua_version=5.4.0
 WORKDIR /build_root
 RUN source '/root/.bashrc' \
-    && curl -sSOJ "https://www.lua.org/ftp/lua-${lua_version}.tar.gz" \
-    && bsdtar -xf "lua-${lua_version}.tar.gz" && rm "lua-${lua_version}.tar.gz"
+    && curl -sS "https://www.lua.org/ftp/lua-${lua_version}.tar.gz" | bsdtar --no-xattrs -xf-;
 WORKDIR "/build_root/lua-${lua_version}"
 RUN make CFLAGS="$CFLAGS -fPIE -Wl,-pie" all test \
     && make install
@@ -16,8 +15,7 @@ SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 ARG libslz_latest_commit_hash='ff537154e7f5f2fffdbef1cd8c52b564c1b00067'
 WORKDIR /build_root
 RUN source '/root/.bashrc' \
-    && curl -sSOJ "http://git.1wt.eu/web?p=libslz.git;a=snapshot;h=${libslz_latest_commit_hash};sf=tbz2" \
-    && bsdtar -xf "libslz-${libslz_latest_commit_hash}.tar.bz2" && rm "libslz-${libslz_latest_commit_hash}.tar.bz2"
+    && curl -sS "http://git.1wt.eu/web?p=libslz.git;a=snapshot;h=${libslz_latest_commit_hash};sf=tbz2" | bsdtar --no-xattrs -xf-;
 WORKDIR /build_root/libslz
 RUN sed -i -E 's!PREFIX     := \/usr\/local!PREFIX     := /usr!' Makefile \
     && make CFLAGS="$CFLAGS -fPIE -Wl,-pie" static
@@ -29,10 +27,9 @@ ARG haproxy_branch=2.2
 ARG haproxy_latest_commit_hash=aa3c7001cb32cd9c5bb7b5258459bb971e956438
 WORKDIR /build_root
 RUN source '/root/.bashrc' \
-    && curl -sS -o "haproxy-${haproxy_branch}.tar.gz" "https://git.haproxy.org/?p=haproxy-${haproxy_branch}.git;a=snapshot;h=${haproxy_latest_commit_hash};sf=tgz" \
     && mkdir "haproxy-${haproxy_branch}" \
-    && bsdtar -xf "haproxy-${haproxy_branch}.tar.gz" --strip-components 1 -C "haproxy-${haproxy_branch}" && rm "haproxy-${haproxy_branch}.tar.gz" \
-    && cd "haproxy-${haproxy_branch}" || exit 1 \
+    && curl -sS "https://git.haproxy.org/?p=haproxy-${haproxy_branch}.git;a=snapshot;h=${haproxy_latest_commit_hash};sf=tgz" | bsdtar --no-xattrs --strip-components 1 -C "haproxy-${haproxy_branch}" -xf-; \
+    cd "haproxy-${haproxy_branch}" || exit 1 \
     && make clean \
     && make -j "$(nproc)" TARGET=linux-musl EXTRA_OBJS="contrib/prometheus-exporter/service-prometheus.o" \
     USE_LUA=1 LUA_INC=/usr/local/include LUA_LIB=/usr/local/lib LUA_LIB_NAME=lua \
