@@ -6,7 +6,8 @@ WORKDIR /build_root
 RUN source '/root/.bashrc' \
     && curl -sS "https://www.lua.org/ftp/lua-${lua_version}.tar.gz" | bsdtar --no-xattrs -xf-;
 WORKDIR "/build_root/lua-${lua_version}"
-RUN make CFLAGS="$CFLAGS -fPIE -Wl,-pie" all test \
+RUN sed -i -E 's!MYCFLAGS=.*!MYCFLAGS='"$CFLAGS"' -fPIE -Wl,-pie!' src/Makefile \
+    && make all test \
     && checkinstall -y --nodoc --pkgversion="$lua_version"
 
 FROM step1_lua54 AS step2_libslz
