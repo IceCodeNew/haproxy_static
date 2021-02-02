@@ -60,6 +60,9 @@ jobs:
           echo "jemalloc_latest_tag_name=$(curl -sL -H 'Accept: application/vnd.github.v3+json' \
                   'https://api.github.com/repos/jemalloc/jemalloc/releases/latest' |
                   grep -F 'tag_name' | cut -d'"' -f4)" >> $GITHUB_ENV
+          echo "jemalloc_latest_commit_hash=$(curl -sSL -H 'Accept: application/vnd.github.v3+json' \
+                  'https://api.github.com/repos/jemalloc/jemalloc/commits?per_page=1' |
+                  grep -Fm1 'sha' | cut -d'"' -f4)" >> $GITHUB_ENV
           echo "pcre2_version=$(curl -sSL \
                   "https://ftp.pcre.org/pub/pcre/" | tr -d '\r\n\t' |
                   grep -Po '(?<=pcre2-)[0-9]+\.[0-9]+(?=\.tar\.bz2)' | sort -ru | head -n 1)" >> $GITHUB_ENV
@@ -95,6 +98,7 @@ jobs:
           sed -i -E "s/^ARG netbsd_curses_tag_name=.+/ARG netbsd_curses_tag_name=${netbsd_curses_tag_name:?empty value}/" haproxy_alpine_builder.Dockerfile haproxy_debian_builder.Dockerfile
           sed -i -E "s/^ARG gettext_tiny_tag_name=.+/ARG gettext_tiny_tag_name=${gettext_tiny_tag_name:?empty value}/" haproxy_alpine_builder.Dockerfile haproxy_debian_builder.Dockerfile
           sed -i -E "s/^ARG jemalloc_latest_tag_name=.+/ARG jemalloc_latest_tag_name=${jemalloc_latest_tag_name:?empty value}/" haproxy_alpine_builder.Dockerfile haproxy_debian_builder.Dockerfile
+          sed -i -E "s/^ARG jemalloc_latest_commit_hash=.+/ARG jemalloc_latest_commit_hash=${jemalloc_latest_commit_hash:?empty value}/" haproxy_alpine_builder.Dockerfile haproxy_debian_builder.Dockerfile
           sed -i -E "s/^ARG haproxy_branch=.+/ARG haproxy_branch=${haproxy_branch:?empty value}/" haproxy_alpine_builder.Dockerfile haproxy_debian_builder.Dockerfile release_haproxy_alpine.Dockerfile release_haproxy_debian.Dockerfile
           sed -i -E "s/^ARG haproxy_latest_commit_hash=.+/ARG haproxy_latest_commit_hash=${haproxy_latest_commit_hash:?empty value}/" haproxy_alpine_builder.Dockerfile haproxy_debian_builder.Dockerfile release_haproxy_alpine.Dockerfile release_haproxy_debian.Dockerfile
           sed -i -E "s/^ARG haproxy_latest_tag_name=.+/ARG haproxy_latest_tag_name=${haproxy_latest_tag_name:?empty value}/" haproxy_alpine_builder.Dockerfile haproxy_debian_builder.Dockerfile release_haproxy_alpine.Dockerfile release_haproxy_debian.Dockerfile

@@ -25,14 +25,22 @@ FROM step2_libslz AS step3_jemalloc
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 # https://api.github.com/repos/jemalloc/jemalloc/releases/latest
 ARG jemalloc_latest_tag_name=5.2.1
-WORKDIR /build_root
+# https://api.github.com/repos/jemalloc/jemalloc/commits?per_page=1
+ARG jemalloc_latest_commit_hash='f6699803e2772de2a4eb253d5b55f00c3842a950'
+# WORKDIR /build_root
+# RUN source '/root/.bashrc' \
+#     && var_icn_download="https://github.com/jemalloc/jemalloc/releases/download/${jemalloc_latest_tag_name}/jemalloc-${jemalloc_latest_tag_name}.tar.bz2" \
+#     && curl -sS -- "$var_icn_download" | bsdtar --no-xattrs -xf-;
+# WORKDIR "/build_root/jemalloc-${jemalloc_latest_tag_name}"
+# RUN ./configure --prefix=/usr --disable-static \
+#     && make -j "$(nproc)" CFLAGS="$CFLAGS -fPIC" \
+#     && checkinstall -y --nodoc --pkgversion="$jemalloc_latest_tag_name"
+WORKDIR '/build_root/jemalloc'
 RUN source '/root/.bashrc' \
-    && var_icn_download="https://github.com/jemalloc/jemalloc/releases/download/${jemalloc_latest_tag_name}/jemalloc-${jemalloc_latest_tag_name}.tar.bz2" \
-    && curl -sS -- "$var_icn_download" | bsdtar --no-xattrs -xf-;
-WORKDIR "/build_root/jemalloc-${jemalloc_latest_tag_name}"
-RUN ./configure --prefix=/usr --disable-static \
+    && git_clone 'https://github.com/jemalloc/jemalloc.git' '/build_root/jemalloc' \
+    && ./autogen.sh --prefix=/usr --disable-static \
     && make -j "$(nproc)" CFLAGS="$CFLAGS -fPIC" \
-    && checkinstall -y --nodoc --pkgversion="$jemalloc_latest_tag_name"
+    && checkinstall -y --nodoc --pkgversion="${jemalloc_latest_tag_name}-dev"
 
 FROM step3_jemalloc AS haproxy_builder
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
@@ -62,7 +70,7 @@ ARG cachebust=1604512266
 ARG haproxy_branch=2.2
 ARG haproxy_latest_tag_name=2.2.4
 ARG jemalloc_latest_tag_name=5.2.1
-COPY --from=step3_jemalloc "/build_root/jemalloc-${jemalloc_latest_tag_name}/jemalloc_${jemalloc_latest_tag_name}-1_amd64.deb" "/build_root/haproxy-${haproxy_branch}/jemalloc_${jemalloc_latest_tag_name}-1_amd64.deb"
+COPY --from=step3_jemalloc "/build_root/jemalloc/jemalloc_${jemalloc_latest_tag_name}-dev-1_amd64.deb" "/build_root/haproxy-${haproxy_branch}/jemalloc_${jemalloc_latest_tag_name}-dev-1_amd64.deb"
 COPY --from=haproxy_builder "/build_root/haproxy-${haproxy_branch}/haproxy_${haproxy_latest_tag_name}-1_amd64.deb" "/build_root/haproxy-${haproxy_branch}/haproxy_${haproxy_latest_tag_name}-1_amd64.deb"
 RUN apk update; apk --no-progress --no-cache add \
     bash coreutils curl findutils; \

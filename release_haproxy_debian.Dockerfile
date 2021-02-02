@@ -28,5 +28,5 @@ RUN --mount=type=secret,id=GIT_AUTH_TOKEN,dst=/tmp/secret_token export GITHUB_TO
     --user IceCodeNew \
     --repo haproxy_static \
     --tag "v${haproxy_latest_tag_name}" \
-    --name "jemalloc_${jemalloc_latest_tag_name}-1_amd64.deb" \
-    --file "/build_root/haproxy-${haproxy_branch}/jemalloc_${jemalloc_latest_tag_name}-1_amd64.deb"
+    --name "jemalloc_${jemalloc_latest_tag_name}-dev-1_amd64.deb" \
+    --file "/build_root/haproxy-${haproxy_branch}/jemalloc_${jemalloc_latest_tag_name}-dev-1_amd64.deb"
