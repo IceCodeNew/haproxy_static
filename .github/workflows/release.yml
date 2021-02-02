@@ -4,8 +4,6 @@ on:
   workflow_dispatch:
   schedule:
     - cron: "45 18 * * *"
-  label:
-    types: [created, deleted]
 
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
