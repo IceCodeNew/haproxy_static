@@ -30,7 +30,7 @@ RUN source '/root/.bashrc' \
     && var_icn_download="https://github.com/jemalloc/jemalloc/releases/download/${jemalloc_latest_tag_name}/jemalloc-${jemalloc_latest_tag_name}.tar.bz2" \
     && curl -sS -- "$var_icn_download" | bsdtar --no-xattrs -xf-;
 WORKDIR "/build_root/jemalloc-${jemalloc_latest_tag_name}"
-RUN ./configure --prefix=/usr \
+RUN ./configure --prefix=/usr --disable-static \
     && make -j "$(nproc)" CFLAGS="$CFLAGS -fPIC" \
     && checkinstall -y --nodoc --pkgversion="$jemalloc_latest_tag_name"
 
