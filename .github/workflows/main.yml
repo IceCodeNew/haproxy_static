@@ -83,10 +83,11 @@ jobs:
           echo "cachebust=$(date +%s)" >> $GITHUB_ENV
         shell: bash
       # Runs a set of commands using the runners shell
-      - name: Bump
+      - name: Force push `release` branch
         run: |
           git config --local user.name "actions"
           git config --local user.email "action@github.com"
+          git checkout release
           git reset --hard origin/master
           sed -i -E "s/^ARG checksec_latest_tag_name=.+/ARG checksec_latest_tag_name=${checksec_latest_tag_name:?empty value}/" haproxy_alpine_builder.Dockerfile haproxy_debian_builder.Dockerfile
           sed -i -E "s/^ARG bashrc_latest_commit_hash=.+/ARG bashrc_latest_commit_hash=${bashrc_latest_commit_hash:?empty value}/" haproxy_alpine_builder.Dockerfile haproxy_debian_builder.Dockerfile
@@ -105,19 +106,8 @@ jobs:
           sed -i -E "s/^ARG lua_version=.+/ARG lua_version=${lua_version:?empty value}/" haproxy_alpine_builder.Dockerfile haproxy_debian_builder.Dockerfile
           sed -i -E "s/^ARG libslz_latest_commit_hash=.+/ARG libslz_latest_commit_hash=${libslz_latest_commit_hash:?empty value}/" haproxy_alpine_builder.Dockerfile haproxy_debian_builder.Dockerfile
           sed -i -E "s/^ARG cachebust=.+/ARG cachebust=${cachebust:?empty value}/" haproxy_alpine_builder.Dockerfile haproxy_debian_builder.Dockerfile
-          git add haproxy_alpine_builder.Dockerfile haproxy_debian_builder.Dockerfile release_haproxy_alpine.Dockerfile release_haproxy_debian.Dockerfile
-          git commit -m "Bump"
-          git push -u origin master
-      - name: Force push `release` branch
-        run: |
-          git config --local user.name "actions"
-          git config --local user.email "action@github.com"
-          git checkout release
-          git reset --hard origin/master
-          git rm got_github_release.sh
+          git add haproxy_alpine_builder.Dockerfile haproxy_debian_builder.Dockerfile release_haproxy_alpine.Dockerfile release_haproxy_debian.Dockerfile got_github_release.sh
           git rm README.md
-          git rm release_haproxy_alpine.Dockerfile
-          git rm release_haproxy_debian.Dockerfile
           git rm -r .github
           git commit -m "${{ env.RELEASE_NAME }}"
           git push -f -u origin release
