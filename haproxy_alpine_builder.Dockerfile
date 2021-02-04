@@ -52,6 +52,6 @@ COPY --from=haproxy_builder \
 "/build_root/haproxy-${haproxy_branch}/haproxy.ori" \
 "/build_root/haproxy-${haproxy_branch}/"
 RUN apk update; apk --no-progress --no-cache add \
-    bash coreutils curl findutils; \
+    bash coreutils curl findutils git; \
     apk --no-progress --no-cache upgrade; \
     rm -rf /var/cache/apk/*
