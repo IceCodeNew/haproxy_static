@@ -63,7 +63,7 @@ RUN source '/root/.bashrc' \
     CFLAGS="$CFLAGS -fPIE -Wl,-pie" \
     && checkinstall -y --nodoc --pkgversion="$haproxy_latest_tag_name" --install=no
 
-FROM quay.io/icecodenew/alpine:edge AS haproxy-alpine-collection
+FROM quay.io/icecodenew/alpine:latest AS haproxy-alpine-collection
 SHELL ["/bin/ash", "-eo", "pipefail", "-c"]
 # date +%s
 ARG cachebust=1604512266

@@ -41,7 +41,7 @@ RUN source '/root/.bashrc' \
     && cp haproxy haproxy.ori \
     && strip haproxy
 
-FROM quay.io/icecodenew/alpine:edge AS haproxy-alpine-collection
+FROM quay.io/icecodenew/alpine:latest AS haproxy-alpine-collection
 SHELL ["/bin/ash", "-eo", "pipefail", "-c"]
 # date +%s
 ARG cachebust=1604512266
