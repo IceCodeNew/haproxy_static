@@ -8,6 +8,8 @@ WORKDIR $dockerfile_workdir
 RUN curl --retry 5 --retry-delay 10 --retry-max-time 60 -fsSL "https://www.lua.org/ftp/lua-${lua_version}.tar.gz" | bsdtar -xf- --strip-components 1 --no-xattrs \
     && sed -i -E 's!MYCFLAGS=.*!MYCFLAGS='"$CFLAGS"' -fPIE -Wl,-pie!' src/Makefile \
     && make all test \
+    && mkdir -p /usr/local/lib/lua \
+    && mkdir -p /usr/local/share/lua \
     && checkinstall -y --nodoc --pkgversion="$lua_version" \
     && rm -rf -- "$dockerfile_workdir"
 
