@@ -26,10 +26,4 @@ RUN --mount=type=secret,id=GIT_AUTH_TOKEN,dst=/tmp/secret_token export GITHUB_TO
     --repo haproxy_static \
     --tag "v${haproxy_latest_tag_name}" \
     --name "haproxy" \
-    --file "/build_root/haproxy-${haproxy_branch}/haproxy"; \
-    # github-release upload \
-    # --user IceCodeNew \
-    # --repo haproxy_static \
-    # --tag "v${haproxy_latest_tag_name}" \
-    # --name "haproxy.ori" \
-    # --file "/build_root/haproxy-${haproxy_branch}/haproxy.ori"
+    --file "/build_root/haproxy-${haproxy_branch}/haproxy"
