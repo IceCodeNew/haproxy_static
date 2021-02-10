@@ -61,7 +61,8 @@ RUN source '/root/.bashrc' \
     USE_OPENSSL=1 SSL_INC="/build_root/.openssl/include" SSL_LIB="/build_root/.openssl/lib" \
     USE_SLZ=1 SLZ_INC="/build_root/libslz/src" SLZ_LIB="/build_root/libslz" \
     CFLAGS="$CFLAGS -fPIE -Wl,-pie" \
-    && checkinstall -y --nodoc --pkgversion="$haproxy_latest_tag_name" --install=no
+    && checkinstall -y --nodoc --pkgversion="$haproxy_latest_tag_name" --install=no \
+    && cat 'contrib/systemd/haproxy.service.in' | sed -E 's/@SBINDIR@/\/usr\/local\/sbin/g' > "/build_root/haproxy-${haproxy_branch}/haproxy.service"
 
 FROM quay.io/icecodenew/alpine:latest AS haproxy-alpine-collection
 SHELL ["/bin/ash", "-eo", "pipefail", "-c"]
@@ -71,7 +72,7 @@ ARG haproxy_branch=2.2
 ARG haproxy_latest_tag_name=2.2.4
 ARG jemalloc_latest_tag_name=5.2.1
 COPY --from=step3_jemalloc "/build_root/jemalloc/jemalloc_${jemalloc_latest_tag_name}-dev-1_amd64.deb" "/build_root/haproxy-${haproxy_branch}/"
-COPY --from=haproxy_builder "/build_root/haproxy-${haproxy_branch}/haproxy_${haproxy_latest_tag_name}-1_amd64.deb" "/build_root/haproxy-${haproxy_branch}/"
+COPY --from=haproxy_builder "/build_root/haproxy-${haproxy_branch}/haproxy_${haproxy_latest_tag_name}-1_amd64.deb" "/build_root/haproxy-${haproxy_branch}/haproxy.service" "/build_root/haproxy-${haproxy_branch}/"
 RUN apk update; apk --no-progress --no-cache add \
     bash coreutils curl findutils git; \
     apk --no-progress --no-cache upgrade; \
