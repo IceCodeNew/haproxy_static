@@ -61,7 +61,8 @@ RUN source '/root/.bashrc' \
     USE_OPENSSL=1 SSL_INC="/build_root/.openssl/include" SSL_LIB="/build_root/.openssl/lib" \
     USE_SLZ=1 SLZ_INC="/build_root/libslz/src" SLZ_LIB="/build_root/libslz" \
     CC=clang CFLAGS="$CFLAGS -fPIE -Wl,-pie" \
-    && checkinstall -y --nodoc --pkgversion="$haproxy_latest_tag_name" --install=no \
+    && checkinstall -y --nodoc --pkgversion="$haproxy_latest_tag_name" \
+    && /usr/local/sbin/haproxy -vvv \
     && cat 'contrib/systemd/haproxy.service.in' | sed -E 's/@SBINDIR@/\/usr\/local\/sbin/g' > "/build_root/haproxy-${haproxy_branch}/haproxy.service"
 
 FROM quay.io/icecodenew/alpine:latest AS haproxy-alpine-collection
