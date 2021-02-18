@@ -60,7 +60,7 @@ RUN source '/root/.bashrc' \
     USE_PCRE2_JIT=1 USE_STATIC_PCRE2=1 USE_SYSTEMD=1 \
     USE_OPENSSL=1 SSL_INC="/build_root/.openssl/include" SSL_LIB="/build_root/.openssl/lib" \
     USE_SLZ=1 SLZ_INC="/build_root/libslz/src" SLZ_LIB="/build_root/libslz" \
-    CFLAGS="$CFLAGS -fPIE -Wl,-pie" \
+    CC=clang CFLAGS="$CFLAGS -fPIE -Wl,-pie" \
     && checkinstall -y --nodoc --pkgversion="$haproxy_latest_tag_name" --install=no \
     && cat 'contrib/systemd/haproxy.service.in' | sed -E 's/@SBINDIR@/\/usr\/local\/sbin/g' > "/build_root/haproxy-${haproxy_branch}/haproxy.service"
 
