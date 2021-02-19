@@ -10,7 +10,12 @@ WORKDIR "/git/haproxy_static"
 RUN --mount=type=secret,id=GIT_AUTH_TOKEN,dst=/tmp/secret_token export GITHUB_TOKEN="$(cat /tmp/secret_token)" \
     && bash /tmp/got_github_release.sh \
     # && git clone -j "$(nproc)" "https://IceCodeNew:${GITHUB_TOKEN}@github.com/IceCodeNew/haproxy_static.git" "/git/haproxy_static" \
-    # && git fetch origin --prune --prune-tags; \
+    # && git fetch origin --prune --prune-tags \
+    # && git remote -v; \
+    # echo '' \
+    # && echo '$$$$$$$$ github-release $$$$$$$$' \
+    # && echo '' \
+    # && set -x; \
     # grep -Fq "v${haproxy_latest_tag_name}" <(git tag) \
     # && github-release delete \
     # --user IceCodeNew \
@@ -24,7 +29,8 @@ RUN --mount=type=secret,id=GIT_AUTH_TOKEN,dst=/tmp/secret_token export GITHUB_TO
     # --tag "v${haproxy_latest_tag_name}" \
     # --name "v${haproxy_latest_tag_name}" \
     # --description - \
-    # --target release; \
+    # --target release \
+    # && sleep 3s \
     && github-release upload \
     --user IceCodeNew \
     --repo haproxy_static \
