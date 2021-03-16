@@ -1,6 +1,6 @@
 FROM quay.io/icecodenew/builder_image_x86_64-linux:alpine AS step1_lua54
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
-## curl -sSL "https://www.lua.org/download.html" | tr -d '\r\n\t' | grep -Po '(?<=lua-)[0-9]\.[0-9]\.[0-9](?=\.tar\.gz)' | sort -ru | head -n 1
+## curl -sSL "https://www.lua.org/download.html" | tr -d '\r\n\t' | grep -Po '(?<=lua-)[0-9]\.[0-9]\.[0-9](?=\.tar\.gz)' | sort -Vr | head -n 1
 ARG lua_version=5.4.0
 WORKDIR /build_root
 RUN source '/root/.bashrc' \
