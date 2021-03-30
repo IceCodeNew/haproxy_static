@@ -1,7 +1,7 @@
 FROM quay.io/icecodenew/builder_image_x86_64-linux:ubuntu AS step1_lua54
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 ## curl -sSL "https://www.lua.org/download.html" | tr -d '\r\n\t' | grep -Po '(?<=lua-)[0-9]\.[0-9]\.[0-9](?=\.tar\.gz)' | sort -ru | head -n 1
-ARG lua_version=5.4.0
+ARG lua_version=5.4.3
 WORKDIR /build_root
 RUN source '/root/.bashrc' \
     && curl -sS "https://www.lua.org/ftp/lua-${lua_version}.tar.gz" | bsdtar --no-xattrs -xf-;
@@ -13,7 +13,7 @@ RUN sed -i -E 's!MYCFLAGS=.*!MYCFLAGS='"$CFLAGS"' -fPIE -Wl,-pie!' src/Makefile 
 FROM step1_lua54 AS step2_libslz
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 ## curl -sSL "http://git.1wt.eu/web?p=libslz.git;a=commit;h=refs/heads/master" | tr -d '\r\n\t' | grep -Po '(?<=<td>commit<\/td><td class="sha1">)[a-zA-Z0-9]+(?=<\/td>)'
-ARG libslz_latest_commit_hash='ff537154e7f5f2fffdbef1cd8c52b564c1b00067'
+ARG libslz_latest_commit_hash=ff537154e7f5f2fffdbef1cd8c52b564c1b00067
 WORKDIR /build_root
 RUN source '/root/.bashrc' \
     && curl -sS "http://git.1wt.eu/web?p=libslz.git;a=snapshot;h=${libslz_latest_commit_hash};sf=tbz2" | bsdtar --no-xattrs -xf-;
@@ -26,7 +26,7 @@ SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 # https://api.github.com/repos/jemalloc/jemalloc/releases/latest
 ARG jemalloc_latest_tag_name=5.2.1
 # https://api.github.com/repos/jemalloc/jemalloc/commits?per_page=1
-ARG jemalloc_latest_commit_hash='f6699803e2772de2a4eb253d5b55f00c3842a950'
+ARG jemalloc_latest_commit_hash=7dc77527ba1fa8a2764b975e9955a55cbb46d034
 # WORKDIR /build_root
 # RUN source '/root/.bashrc' \
 #     && var_icn_download="https://github.com/jemalloc/jemalloc/releases/download/${jemalloc_latest_tag_name}/jemalloc-${jemalloc_latest_tag_name}.tar.bz2" \
@@ -46,8 +46,8 @@ FROM step3_jemalloc AS haproxy_builder
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 ARG haproxy_branch=2.2
 ## curl -sSL "https://git.haproxy.org/?p=haproxy-${haproxy_branch}.git;a=commit;h=refs/heads/master" | tr -d '\r\n\t' | grep -Po '(?<=<td>commit<\/td><td class="sha1">)[a-zA-Z0-9]+(?=<\/td>)'
-ARG haproxy_latest_commit_hash=aa3c7001cb32cd9c5bb7b5258459bb971e956438
-ARG haproxy_latest_tag_name=2.2.4
+ARG haproxy_latest_commit_hash=601704962bc9d82b3b1cc97d90d2763db0ae4479
+ARG haproxy_latest_tag_name=2.2.11
 WORKDIR /build_root
 RUN source '/root/.bashrc' \
     && mkdir "haproxy-${haproxy_branch}" \
@@ -68,9 +68,9 @@ RUN source '/root/.bashrc' \
 FROM quay.io/icecodenew/alpine:latest AS haproxy-alpine-collection
 SHELL ["/bin/ash", "-eo", "pipefail", "-c"]
 # date +%s
-ARG cachebust=1604512266
+ARG cachebust=1617127429
 ARG haproxy_branch=2.2
-ARG haproxy_latest_tag_name=2.2.4
+ARG haproxy_latest_tag_name=2.2.11
 ARG jemalloc_latest_tag_name=5.2.1
 COPY --from=step3_jemalloc "/build_root/jemalloc/jemalloc_${jemalloc_latest_tag_name}-dev-1_amd64.deb" "/build_root/haproxy-${haproxy_branch}/"
 COPY --from=haproxy_builder "/build_root/haproxy-${haproxy_branch}/haproxy_${haproxy_latest_tag_name}-1_amd64.deb" "/build_root/haproxy-${haproxy_branch}/haproxy.service" "/build_root/haproxy-${haproxy_branch}/"
