@@ -72,11 +72,11 @@ jobs:
           echo "libslz_latest_commit_hash=$(curl -sSL \
                   "http://git.1wt.eu/web?p=libslz.git;a=commit;h=refs/heads/master" | tr -d '\r\n\t' |
                   grep -Po '(?<=<td>commit<\/td><td class="sha1">)[a-zA-Z0-9]+(?=<\/td>)')" >> $GITHUB_ENV
-          echo "haproxy_branch=2.2" >> $GITHUB_ENV
-          echo "haproxy_latest_commit_hash=$(export haproxy_branch=2.2 && curl -sSL \
+          echo "haproxy_branch=2.4" >> $GITHUB_ENV
+          echo "haproxy_latest_commit_hash=$(export haproxy_branch=2.4 && curl -sSL \
                   "https://git.haproxy.org/?p=haproxy-${haproxy_branch}.git;a=commit;h=refs/heads/master" | tr -d '\r\n\t' |
                   grep -Po '(?<=<td>commit<\/td><td class="sha1">)[a-zA-Z0-9]+(?=<\/td>)')" >> $GITHUB_ENV
-          echo "haproxy_latest_tag_name=$(export haproxy_branch=2.2 && curl -sSL \
+          echo "haproxy_latest_tag_name=$(export haproxy_branch=2.4 && curl -sSL \
                   "https://git.haproxy.org/?p=haproxy-${haproxy_branch}.git;a=tags" | tr -d '\r\n\t' |
                   grep -Po "(?<=a=shortlog;h=refs\/tags\/v)${haproxy_branch}\.[0-9]+" |
                   LC_ALL=C sort -Vr | head -n 1)" >> $GITHUB_ENV
