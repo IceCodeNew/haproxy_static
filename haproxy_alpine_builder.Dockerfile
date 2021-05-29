@@ -16,7 +16,7 @@ SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 ARG libslz_latest_commit_hash='ff537154e7f5f2fffdbef1cd8c52b564c1b00067'
 WORKDIR /build_root
 RUN source '/root/.bashrc' \
-    && curl -sS "http://git.1wt.eu/web?p=libslz.git;a=snapshot;h=${libslz_latest_commit_hash};sf=tbz2" | bsdtar --no-xattrs -xf-;
+    && curl -sS "http://git.1wt.eu/web?p=libslz.git;a=snapshot;h=${libslz_latest_commit_hash};sf=tgz" | bsdtar --no-xattrs -xf-;
 WORKDIR /build_root/libslz
 RUN sed -i -E 's!PREFIX     := \/usr\/local!PREFIX     := /usr!' Makefile \
     && make CFLAGS="$CFLAGS -fPIE -Wl,-pie" static
