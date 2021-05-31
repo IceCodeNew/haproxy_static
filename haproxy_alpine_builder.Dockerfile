@@ -24,9 +24,10 @@ RUN source '/root/.bashrc' \
     && make -j "$(nproc)" TARGET=linux-musl \
     USE_LUA=1 LUA_INC=/usr/local/include LUA_LIB=/usr/local/lib LUA_LIB_NAME=lua \
     USE_PCRE2_JIT=1 USE_STATIC_PCRE2=1 \
+    USE_PIE=1 USE_STACKPROTECTOR=1 USE_RELRO_NOW=1 \
     USE_OPENSSL=1 SSL_INC="/usr/include/openssl" SSL_LIB="/usr/lib" \
     USE_PROMEX=1 \
-    CFLAGS="$CFLAGS -fPIE -Wl,-pie" LDFLAGS="$LDFLAGS -static-pie -nolibc -Wl,-Bstatic -L /usr/lib -l:libc.a" \
+    CFLAGS="$CFLAGS -fPIE -pie" LDFLAGS="$LDFLAGS -static-pie -nolibc -Wl,-Bstatic -L /usr/lib -l:libc.a" \
     && cp haproxy haproxy.ori \
     && strip haproxy
 

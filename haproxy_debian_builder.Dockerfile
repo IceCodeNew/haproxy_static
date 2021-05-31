@@ -47,9 +47,10 @@ RUN source '/root/.bashrc' \
     ADDLIB="-ljemalloc $(jemalloc-config --libs)" \
     USE_LUA=1 LUA_INC=/usr/local/include LUA_LIB=/usr/local/lib LUA_LIB_NAME=lua \
     USE_PCRE2_JIT=1 USE_STATIC_PCRE2=1 USE_SYSTEMD=1 \
+    USE_PIE=1 USE_STACKPROTECTOR=1 USE_RELRO_NOW=1 \
     USE_OPENSSL=1 SSL_INC="/build_root/.openssl/include" SSL_LIB="/build_root/.openssl/lib" \
     USE_PROMEX=1 \
-    CC=clang CFLAGS="$CFLAGS -fPIE -Wl,-pie" \
+    CFLAGS="$CFLAGS -fPIE -pie" \
     && checkinstall -y --nodoc --pkgversion="$haproxy_latest_tag_name" \
     && /usr/local/sbin/haproxy -vvv \
     && cat 'admin/systemd/haproxy.service.in' | sed -E 's/@SBINDIR@/\/usr\/local\/sbin/g' > "/build_root/haproxy-${haproxy_branch}/haproxy.service"
