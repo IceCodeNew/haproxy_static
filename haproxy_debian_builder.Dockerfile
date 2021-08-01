@@ -53,7 +53,7 @@ RUN source '/root/.bashrc' \
     CFLAGS="$CFLAGS -fPIE -pie -fwrapv" \
     && checkinstall -y --nodoc --pkgversion="$haproxy_latest_tag_name" \
     && /usr/local/sbin/haproxy -vvv \
-    && cat 'admin/systemd/haproxy.service.in' | sed -E 's/@SBINDIR@/\/usr\/local\/sbin/g' > "/build_root/haproxy-${haproxy_branch}/haproxy.service"
+    && sed -E 's/@SBINDIR@/\/usr\/local\/sbin/g' 'admin/systemd/haproxy.service.in' > "/build_root/haproxy-${haproxy_branch}/haproxy.service"
 
 FROM quay.io/icecodenew/alpine:latest AS haproxy-alpine-collection
 SHELL ["/bin/ash", "-eo", "pipefail", "-c"]
