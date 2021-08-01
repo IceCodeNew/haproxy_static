@@ -50,7 +50,7 @@ RUN source '/root/.bashrc' \
     USE_PIE=1 USE_STACKPROTECTOR=1 USE_RELRO_NOW=1 \
     USE_OPENSSL=1 SSL_INC="/build_root/.openssl/include" SSL_LIB="/build_root/.openssl/lib" \
     USE_PROMEX=1 \
-    CFLAGS="$CFLAGS -fPIE -pie" \
+    CFLAGS="$CFLAGS -fPIE -pie -fwrapv" \
     && checkinstall -y --nodoc --pkgversion="$haproxy_latest_tag_name" \
     && /usr/local/sbin/haproxy -vvv \
     && cat 'admin/systemd/haproxy.service.in' | sed -E 's/@SBINDIR@/\/usr\/local\/sbin/g' > "/build_root/haproxy-${haproxy_branch}/haproxy.service"
