@@ -1,7 +1,7 @@
 FROM quay.io/icecodenew/builder_image_x86_64-linux:ubuntu AS step1_lua54
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 ## curl -sSL "https://www.lua.org/download.html" | tr -d '\r\n\t' | grep -Po '(?<=lua-)[0-9]\.[0-9]\.[0-9](?=\.tar\.gz)' | sort -Vr | head -n 1
-ARG lua_version=5.4.0
+ARG lua_version=5.4.3
 WORKDIR /build_root
 RUN source '/root/.bashrc' \
     && curl -sS "https://www.lua.org/ftp/lua-${lua_version}.tar.gz" | bsdtar --no-xattrs -xf-;
@@ -15,7 +15,7 @@ SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 # https://api.github.com/repos/jemalloc/jemalloc/releases/latest
 ARG jemalloc_latest_tag_name=5.2.1
 # https://api.github.com/repos/jemalloc/jemalloc/commits?per_page=1
-ARG jemalloc_latest_commit_hash='f6699803e2772de2a4eb253d5b55f00c3842a950'
+ARG jemalloc_latest_commit_hash=912324a1acae4bfb6445825caad000aa295dcca8
 # WORKDIR /build_root
 # RUN source '/root/.bashrc' \
 #     && var_icn_download="https://github.com/jemalloc/jemalloc/releases/download/${jemalloc_latest_tag_name}/jemalloc-${jemalloc_latest_tag_name}.tar.bz2" \
@@ -35,8 +35,8 @@ FROM step3_jemalloc AS haproxy_builder
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 ARG haproxy_branch=2.4
 ## curl -sSL "https://git.haproxy.org/?p=haproxy-${haproxy_branch}.git;a=commit;h=refs/heads/master" | tr -d '\r\n\t' | grep -Po '(?<=<td>commit<\/td><td class="sha1">)[a-zA-Z0-9]+(?=<\/td>)'
-ARG haproxy_latest_commit_hash='6cbbecf09734aeb5fa8bb88f36f06a6f6d35e813'
-ARG haproxy_latest_tag_name='2.4.0'
+ARG haproxy_latest_commit_hash=e74a1b34b67f21407ddcea920ec6426b43e19dfd
+ARG haproxy_latest_tag_name=2.4.5
 WORKDIR /build_root
 RUN source '/root/.bashrc' \
     && mkdir "haproxy-${haproxy_branch}" \
@@ -58,9 +58,9 @@ RUN source '/root/.bashrc' \
 FROM quay.io/icecodenew/alpine:latest AS haproxy-alpine-collection
 SHELL ["/bin/ash", "-eo", "pipefail", "-c"]
 # date +%s
-ARG cachebust=1604512266
+ARG cachebust=1633283708
 ARG haproxy_branch=2.4
-ARG haproxy_latest_tag_name=2.4.0
+ARG haproxy_latest_tag_name=2.4.5
 ARG jemalloc_latest_tag_name=5.2.1
 COPY --from=step3_jemalloc "/build_root/jemalloc/jemalloc_${jemalloc_latest_tag_name}-dev-1_amd64.deb" "/build_root/haproxy-${haproxy_branch}/"
 COPY --from=haproxy_builder "/build_root/haproxy-${haproxy_branch}/haproxy_${haproxy_latest_tag_name}-1_amd64.deb" "/build_root/haproxy-${haproxy_branch}/haproxy.service" "/build_root/haproxy-${haproxy_branch}/"
