@@ -29,6 +29,4 @@ curl_to_dest() {
 
 mkdir -p /usr/local/bin
 
-curl_to_dest "https://github.com/IceCodeNew/go-collection/releases/latest/download/github-release" '/usr/local/bin/github-release'
-
-curl_to_dest "https://github.com/IceCodeNew/go-collection/releases/latest/download/got" '/usr/local/bin/got'
+curl_to_dest "https://cdn.jsdelivr.net/gh/IceCodeNew/go-collection@latest-release/assets/github-release" '/usr/local/bin/github-release'
