@@ -2,7 +2,7 @@
 FROM quay.io/icecodenew/haproxy_static:alpine AS haproxy_uploader
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 ARG haproxy_branch=2.4
-ARG haproxy_latest_tag_name=2.4.0
+ARG haproxy_latest_tag_name=2.4.10
 COPY got_github_release.sh /tmp/got_github_release.sh
 WORKDIR "/git/haproxy_static"
 # import secret:
