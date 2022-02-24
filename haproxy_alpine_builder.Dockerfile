@@ -1,7 +1,7 @@
 FROM quay.io/icecodenew/builder_image_x86_64-linux:alpine AS step1_lua54
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 ## curl -sSL "https://www.lua.org/download.html" | tr -d '\r\n\t' | grep -Po '(?<=lua-)[0-9]\.[0-9]\.[0-9](?=\.tar\.gz)' | sort -Vr | head -n 1
-ARG lua_version=5.4.0
+ARG lua_version=5.4.4
 WORKDIR /build_root
 RUN source '/root/.bashrc' \
     && curl -sS "https://www.lua.org/ftp/lua-${lua_version}.tar.gz" | bsdtar --no-xattrs -xf-;
@@ -14,7 +14,7 @@ FROM step1_lua54 AS haproxy_builder
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 ARG haproxy_branch=2.4
 ## curl -sSL "https://git.haproxy.org/?p=haproxy-${haproxy_branch}.git;a=commit;h=refs/heads/master" | tr -d '\r\n\t' | grep -Po '(?<=<td>commit<\/td><td class="sha1">)[a-zA-Z0-9]+(?=<\/td>)'
-ARG haproxy_latest_commit_hash='6cbbecf09734aeb5fa8bb88f36f06a6f6d35e813'
+ARG haproxy_latest_commit_hash=9c87255b98122f104e1188d4f0c18eeb8576b0f1
 WORKDIR /build_root
 RUN source '/root/.bashrc' \
     && mkdir "haproxy-${haproxy_branch}" \
@@ -34,9 +34,9 @@ RUN source '/root/.bashrc' \
 FROM quay.io/icecodenew/alpine:latest AS haproxy-alpine-collection
 SHELL ["/bin/ash", "-eo", "pipefail", "-c"]
 # date +%s
-ARG cachebust=1604512266
+ARG cachebust=1645725048
 ARG haproxy_branch=2.4
-ARG haproxy_latest_tag_name=2.4.0
+ARG haproxy_latest_tag_name=2.4.13
 COPY --from=haproxy_builder \
 "/build_root/haproxy-${haproxy_branch}/haproxy" \
 "/build_root/haproxy-${haproxy_branch}/haproxy.ori" \
