@@ -1,7 +1,6 @@
 # syntax=docker.io/docker/dockerfile-upstream:1.2.0
 FROM quay.io/icecodenew/haproxy_static:alpine AS haproxy_uploader
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
-ARG haproxy_branch=2.4
 ARG haproxy_latest_tag_name=2.4.0
 COPY got_github_release.sh /tmp/got_github_release.sh
 WORKDIR "/git/haproxy_static"
@@ -38,4 +37,4 @@ RUN --mount=type=secret,id=GIT_AUTH_TOKEN,dst=/tmp/secret_token export GITHUB_TO
     --repo haproxy_static \
     --tag "v${haproxy_latest_tag_name}" \
     --name "haproxy" \
-    --file "/build_root/haproxy-${haproxy_branch}/haproxy"
+    --file "/haproxy"
