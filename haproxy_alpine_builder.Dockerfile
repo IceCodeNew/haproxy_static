@@ -7,7 +7,7 @@ ARG dockerfile_workdir=/build_root/lua
 WORKDIR $dockerfile_workdir
 RUN curl -sS "https://www.lua.org/ftp/lua-${lua_version}.tar.gz" | bsdtar -xf- --strip-components 1 --no-xattrs \
     && sed -i -E 's!MYCFLAGS=.*!MYCFLAGS='"$CFLAGS"' -fPIE -Wl,-pie!' src/Makefile \
-    && make all test \
+    && mold -run make all test \
     && make install \
     && rm -rf -- "$dockerfile_workdir"
 
@@ -24,13 +24,14 @@ RUN curl -fsSL "https://git.haproxy.org/?p=haproxy-${haproxy_branch}.git;a=snaps
     && LDFLAGS="$LDFLAGS -static-pie -nolibc -Wl,-Bstatic -L /usr/lib -l:libc.a" \
     && export CFLAGS CXXFLAGS LDFLAGS \
     && make clean \
-    && make -j "$(nproc)" TARGET=linux-musl \
+    && mold -run make -j "$(nproc)" TARGET=linux-musl \
     USE_LUA=1 LUA_INC=/usr/local/include LUA_LIB=/usr/local/lib LUA_LIB_NAME=lua \
     USE_PCRE2_JIT=1 USE_STATIC_PCRE2=1 \
     USE_PIE=1 USE_STACKPROTECTOR=1 USE_RELRO_NOW=1 \
     USE_OPENSSL=1 SSL_INC="/usr/include/openssl" SSL_LIB="/usr/lib" \
     USE_PROMEX=1 \
     && strip -o /haproxy ./haproxy \
+    && readelf -p .comment /haproxy \
     && rm -rf -- "$dockerfile_workdir"
 
 FROM quay.io/icecodenew/alpine:latest AS haproxy-alpine-collection
