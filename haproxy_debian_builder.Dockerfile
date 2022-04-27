@@ -1,4 +1,4 @@
-FROM quay.io/icecodenew/builder_image_x86_64-linux:ubuntu AS step1_lua54
+FROM quay.io/icecodenew/builder_image_x86_64-linux:debian AS step1_lua54
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 ## curl -sSL "https://www.lua.org/download.html" | tr -d '\r\n\t' | grep -Po '(?<=lua-)[0-9]\.[0-9]\.[0-9](?=\.tar\.gz)' | sort -Vr | head -n 1
 ARG lua_version='5.4.4'
