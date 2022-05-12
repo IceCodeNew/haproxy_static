@@ -1,8 +1,8 @@
 FROM quay.io/icecodenew/builder_image_x86_64-linux:debian AS step1_lua54
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 ## curl -sSL "https://www.lua.org/download.html" | tr -d '\r\n\t' | grep -Po '(?<=lua-)[0-9]\.[0-9]\.[0-9](?=\.tar\.gz)' | sort -Vr | head -n 1
-ARG lua_version='5.4.4'
-ARG image_build_date='2022-03-08'
+ARG lua_version=5.4.4
+ARG image_build_date=2022-05-13
 ARG dockerfile_workdir=/build_root/lua
 WORKDIR $dockerfile_workdir
 RUN curl --retry 5 --retry-delay 10 --retry-max-time 60 -fsSL "https://www.lua.org/ftp/lua-${lua_version}.tar.gz" | bsdtar -xf- --strip-components 1 --no-xattrs \
@@ -16,9 +16,9 @@ RUN curl --retry 5 --retry-delay 10 --retry-max-time 60 -fsSL "https://www.lua.o
 FROM step1_lua54 AS step3_jemalloc
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 # https://api.github.com/repos/jemalloc/jemalloc/releases/latest
-ARG jemalloc_latest_tag_name='5.2.1'
+ARG jemalloc_latest_tag_name=5.3.0
 # https://api.github.com/repos/jemalloc/jemalloc/commits?per_page=1
-ARG jemalloc_latest_commit_hash='f6699803e2772de2a4eb253d5b55f00c3842a950'
+ARG jemalloc_latest_commit_hash=70d4102f48dce2d5755e9139a15eeec606f97bff
 ARG dockerfile_workdir=/build_root/jemalloc
 WORKDIR $dockerfile_workdir
 RUN git clone -j "$(nproc)" --no-tags --shallow-submodules --recurse-submodules --depth 1 --single-branch 'https://github.com/jemalloc/jemalloc.git' . \
@@ -35,8 +35,8 @@ FROM step3_jemalloc AS haproxy_builder
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 ARG haproxy_branch=2.4
 ## curl -sSL "https://git.haproxy.org/?p=haproxy-${haproxy_branch}.git;a=commit;h=refs/heads/master" | tr -d '\r\n\t' | grep -Po '(?<=<td>commit<\/td><td class="sha1">)[a-zA-Z0-9]+(?=<\/td>)'
-ARG haproxy_latest_commit_hash='12460dbc67dedd1fef9dc81f59ee8154d9f6198f'
-ARG haproxy_latest_tag_name='2.4.14'
+ARG haproxy_latest_commit_hash=715c8fc37a8368a4b39964abff835e17e99b723e
+ARG haproxy_latest_tag_name=2.4.16
 ARG dockerfile_workdir=/build_root/haproxy
 WORKDIR $dockerfile_workdir
 RUN curl --retry 5 --retry-delay 10 --retry-max-time 60 -fsSL "https://git.haproxy.org/?p=haproxy-${haproxy_branch}.git;a=snapshot;h=${haproxy_latest_commit_hash};sf=tgz" | bsdtar -xf- --strip-components 1 --no-xattrs \
@@ -61,8 +61,8 @@ RUN curl --retry 5 --retry-delay 10 --retry-max-time 60 -fsSL "https://git.hapro
 FROM quay.io/icecodenew/alpine:latest AS haproxy-alpine-collection
 SHELL ["/bin/ash", "-eo", "pipefail", "-c"]
 ARG haproxy_branch=2.4
-ARG haproxy_latest_tag_name=2.4.0
-ARG jemalloc_latest_tag_name=5.2.1
+ARG haproxy_latest_tag_name=2.4.16
+ARG jemalloc_latest_tag_name=5.3.0
 COPY --from=step3_jemalloc "/build_root/jemalloc_${jemalloc_latest_tag_name}-dev-1_amd64.deb" "/build_root/"
 COPY --from=haproxy_builder "/build_root/haproxy_${haproxy_latest_tag_name}-1_amd64.deb" "/build_root/haproxy.service" "/build_root/"
 RUN apk update; apk --no-progress --no-cache add \

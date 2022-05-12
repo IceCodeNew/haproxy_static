@@ -1,8 +1,8 @@
 FROM quay.io/icecodenew/builder_image_x86_64-linux:alpine AS step1_lua54
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 ## curl -sSL "https://www.lua.org/download.html" | tr -d '\r\n\t' | grep -Po '(?<=lua-)[0-9]\.[0-9]\.[0-9](?=\.tar\.gz)' | sort -Vr | head -n 1
-ARG lua_version='5.4.4'
-ARG image_build_date='2022-03-08'
+ARG lua_version=5.4.4
+ARG image_build_date=2022-05-13
 ARG dockerfile_workdir=/build_root/lua
 WORKDIR $dockerfile_workdir
 RUN curl -sS "https://www.lua.org/ftp/lua-${lua_version}.tar.gz" | bsdtar -xf- --strip-components 1 --no-xattrs \
@@ -13,9 +13,9 @@ RUN curl -sS "https://www.lua.org/ftp/lua-${lua_version}.tar.gz" | bsdtar -xf- -
 
 FROM step1_lua54 AS haproxy_builder
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
-ARG haproxy_branch='2.4'
+ARG haproxy_branch=2.4
 ## curl -sSL "https://git.haproxy.org/?p=haproxy-${haproxy_branch}.git;a=commit;h=refs/heads/master" | tr -d '\r\n\t' | grep -Po '(?<=<td>commit<\/td><td class="sha1">)[a-zA-Z0-9]+(?=<\/td>)'
-ARG haproxy_latest_commit_hash='12460dbc67dedd1fef9dc81f59ee8154d9f6198f'
+ARG haproxy_latest_commit_hash=715c8fc37a8368a4b39964abff835e17e99b723e
 ARG dockerfile_workdir=/build_root/haproxy
 WORKDIR $dockerfile_workdir
 RUN curl -fsSL "https://git.haproxy.org/?p=haproxy-${haproxy_branch}.git;a=snapshot;h=${haproxy_latest_commit_hash};sf=tgz" | bsdtar -xf- --strip-components 1 --no-xattrs \
