@@ -59,8 +59,8 @@ jobs:
           git config --local user.email "action@github.com"
           git checkout release
           git reset --hard origin/master
-          sed -i -E "s/^ARG jemalloc_latest_tag_name=.+/ARG jemalloc_latest_tag_name=${jemalloc_latest_tag_name:?empty value}/" haproxy_alpine_builder.Dockerfile haproxy_debian_builder.Dockerfile
-          sed -i -E "s/^ARG jemalloc_latest_commit_hash=.+/ARG jemalloc_latest_commit_hash=${jemalloc_latest_commit_hash:?empty value}/" haproxy_alpine_builder.Dockerfile haproxy_debian_builder.Dockerfile
+          sed -i -E "s/^ARG jemalloc_latest_tag_name=.+/ARG jemalloc_latest_tag_name=${jemalloc_latest_tag_name:?empty value}/" haproxy_alpine_builder.Dockerfile haproxy_debian_builder.Dockerfile release_haproxy_alpine.Dockerfile release_haproxy_debian.Dockerfile
+          sed -i -E "s/^ARG jemalloc_latest_commit_hash=.+/ARG jemalloc_latest_commit_hash=${jemalloc_latest_commit_hash:?empty value}/" haproxy_alpine_builder.Dockerfile haproxy_debian_builder.Dockerfile release_haproxy_alpine.Dockerfile release_haproxy_debian.Dockerfile
           sed -i -E "s/^ARG haproxy_branch=.+/ARG haproxy_branch=${haproxy_branch:?empty value}/" haproxy_alpine_builder.Dockerfile haproxy_debian_builder.Dockerfile release_haproxy_alpine.Dockerfile release_haproxy_debian.Dockerfile
           sed -i -E "s/^ARG haproxy_latest_commit_hash=.+/ARG haproxy_latest_commit_hash=${haproxy_latest_commit_hash:?empty value}/" haproxy_alpine_builder.Dockerfile haproxy_debian_builder.Dockerfile release_haproxy_alpine.Dockerfile release_haproxy_debian.Dockerfile
           sed -i -E "s/^ARG haproxy_latest_tag_name=.+/ARG haproxy_latest_tag_name=${haproxy_latest_tag_name:?empty value}/" haproxy_alpine_builder.Dockerfile haproxy_debian_builder.Dockerfile release_haproxy_alpine.Dockerfile release_haproxy_debian.Dockerfile
