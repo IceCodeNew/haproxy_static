@@ -36,7 +36,7 @@ jobs:
           echo "jemalloc_latest_tag_name=$(curl -sL -H 'Accept: application/vnd.github.v3+json' \
                   'https://api.github.com/repos/jemalloc/jemalloc/releases/latest' |
                   grep -F 'tag_name' | cut -d'"' -f4)" >> $GITHUB_ENV
-          echo "jemalloc_latest_commit_hash=$(curl -sSL -H 'Accept: application/vnd.github.v3+json' \
+          echo "jemalloc_latest_commit_hash=$(curl -sSL --fail --retry 5 --retry-delay 10 --retry-max-time 60 -H 'Accept: application/vnd.github.v3+json' \
                   'https://api.github.com/repos/jemalloc/jemalloc/commits?per_page=1' |
                   grep -Fm1 'sha' | cut -d'"' -f4)" >> $GITHUB_ENV
           echo "lua_version=$(curl -sSL \
