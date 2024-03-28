@@ -1,8 +1,8 @@
 # syntax=docker.io/docker/dockerfile-upstream:1.2.0
 FROM quay.io/icecodenew/haproxy_static:debian AS haproxy_uploader
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
-ARG haproxy_latest_tag_name=2.4.0
-ARG jemalloc_latest_tag_name='5.2.1'
+ARG haproxy_latest_tag_name=2.4.25
+ARG jemalloc_latest_tag_name=5.3.0
 COPY got_github_release.sh /tmp/got_github_release.sh
 WORKDIR "/git/haproxy_static"
 # import secret:
